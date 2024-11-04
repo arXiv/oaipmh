@@ -14,6 +14,8 @@ class Settings(arxiv_base.Settings):
     SQLALCHEMY_MAX_OVERFLOW: Optional[int] = 0
     SQLALCHEMY_POOL_SIZE: Optional[int] = 10
 
+    APPLICATION_ROOT: Optional[str] = None
+
     def check(self) -> None:
         """A check and fix up of a settings object."""
         if 'sqlite' in self.CLASSIC_DB_URI:
