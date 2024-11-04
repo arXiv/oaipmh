@@ -7,6 +7,7 @@ poetry install
 
 run:
 python main.py
+Then check the app is running with http://localhost:8080/oai
 
 tests:
 

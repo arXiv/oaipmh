@@ -2,7 +2,6 @@ import pytest
 from oaipmh.factory import create_web_app
 
 TESTING_CONFIG = {
-    "APPLICATION_ROOT": "",
     "TESTING": True
     }
 
