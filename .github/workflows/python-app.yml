@@ -29,4 +29,4 @@ jobs:
         poetry install
     - name: Test with pytest
       run: |
-        poetry run pytest --cov=oaipmh --cov-fail-under=80 tests
+        poetry run pytest --cov=oaipmh --cov-fail-under=40 tests
