@@ -8,7 +8,7 @@ from arxiv.base import Base
 from arxiv.db import config_query_timing, configure_db
 
 from oaipmh.config import Settings
-from oaipmh import routes
+from oaipmh.requests import routes
 
 s3 = FlaskS3()
 
