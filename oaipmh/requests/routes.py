@@ -1,5 +1,6 @@
 from typing import Dict
-from flask import Blueprint, request, Response
+from datetime import datetime, timezone
+from flask import Blueprint, request, Response, render_template
 
 from oaipmh.requests.verb_sorter import verb_sorter
 
@@ -11,6 +12,14 @@ def oai() -> Response:
 
     params: Dict[str, str] = request.args.to_dict() if request.method == 'GET' else request.form.to_dict()
     result=verb_sorter(params)
-    #TODO package interior data in page
+    
+    
+    response_xml=render_template("base.xml", 
+                                 response_date=datetime.now(timezone.utc),
+                                 request_info="request info", #TODO
+                                 interior_xml="interior data" #TODO
+                                 )
+    
+    headers={"Content-Type":"application/xml"}
 
-    return "working", 200, {}
+    return response_xml, 200, headers
