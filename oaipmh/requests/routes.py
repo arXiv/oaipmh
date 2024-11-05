@@ -19,7 +19,11 @@ def oai() -> Response:
                                  request_info="request info", #TODO
                                  interior_xml="interior data" #TODO
                                  )
-    
     headers={"Content-Type":"application/xml"}
 
     return response_xml, 200, headers
+
+@blueprint.route('/favicon.ico')
+def favicon():
+    #TODO
+    return '', 204

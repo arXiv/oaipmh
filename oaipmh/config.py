@@ -14,6 +14,8 @@ class Settings(arxiv_base.Settings):
     SQLALCHEMY_MAX_OVERFLOW: Optional[int] = 0
     SQLALCHEMY_POOL_SIZE: Optional[int] = 10
 
+    FLASKS3_BUCKET_NAME: str = "some_bucket" #TODO needed to use url for for some reason?
+
     def check(self) -> None:
         """A check and fix up of a settings object."""
         if 'sqlite' in self.CLASSIC_DB_URI:
