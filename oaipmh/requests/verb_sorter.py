@@ -1,11 +1,12 @@
 from typing import Dict
 
+
 from oaipmh.requests.info_queries import identify, list_metadata_formats, list_sets
 from oaipmh.requests.data_queries import get_record, list_identifiers, list_records
-from oaipmh.serializers.output_formats import InteriorData
+from oaipmh.serializers.output_formats import Response
 from oaipmh.data.oai_errors import OAIBadVerb
 
-def verb_sorter(params: Dict[str, str]) -> InteriorData:
+def verb_sorter(params: Dict[str, str]) -> Response:
     """
     sorts OAI queries to the appropriate handler based on their verb statement
     this defines what the client is asking for as per the OAI standard

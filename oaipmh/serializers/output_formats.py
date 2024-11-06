@@ -1,3 +1,3 @@
+from typing import Tuple, Dict, Any
 
-class InteriorData: #TODO placeholder return type
-    value=""
+Response = Tuple[Dict[str, Any], int, Dict[str, Any]]
