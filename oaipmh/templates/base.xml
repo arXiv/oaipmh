@@ -4,6 +4,9 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
     <responseDate>{{ response_date.strftime("%Y-%m-%dT%H:%M:%SZ") }}</responseDate>
-    {{macros.request_element()}}
-    {{interior_xml}}
+    {% block request_element %}
+    {% endblock %}
+
+    {% block interior_xml %}
+    {% endblock %}
 </OAI-PMH>

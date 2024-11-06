@@ -78,4 +78,24 @@ def test_list_sets(test_client):
         assert response.status_code == 200
         mock_list_sets.assert_called_once_with(params)
 
-#TODO test no/bad verb
+def test_no_verb(test_client):
+    params = {"not_verb": "ListSets"}
+    
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200
+    assert "<error code='badVerb'>" in response.text
+
+    response = test_client.post("/oai", data=params)
+    assert response.status_code == 200
+    assert "<error code='badVerb'>" in response.text
+
+def test_bad_verb(test_client):
+    params = {"verb": "chaos!"}
+    
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200
+    assert "<error code='badVerb'>" in response.text
+
+    response = test_client.post("/oai", data=params)
+    assert response.status_code == 200
+    assert "<error code='badVerb'>" in response.text

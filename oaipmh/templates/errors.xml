@@ -1,0 +1,9 @@
+{% extends "base.xml" %}
+
+{% block request_element %}
+    {{ macros.request_element() }}
+{% endblock %}
+
+{% block interior_xml %}
+    <error code='{{error.code}}'>{{error.description}}</error>
+{% endblock %}
