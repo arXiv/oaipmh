@@ -27,14 +27,15 @@ def get_record(params: Dict[str, str]) -> Response:
 
 def list_records(params: Dict[str, str]) -> Response:
     """used to harvest records from a repository with support for selective harvesting"""
-
-    token=None
+    query_data: Dict[OAIParams, str]={OAIParams.VERB:OAIVerbs.LIST_RECORDS}
+    
     #get parameters
     given_params=set(params.keys())
     if OAIParams.RES_TOKEN in given_params:
         if given_params != {OAIParams.RES_TOKEN, OAIParams.VERB}: #resumption token is exclusive
             raise OAIBadArgument
         token=params[OAIParams.RES_TOKEN]
+        #TODO token validation
     else:
         if OAIParams.META_PREFIX not in given_params:
             raise OAIBadArgument
@@ -46,13 +47,15 @@ def list_records(params: Dict[str, str]) -> Response:
         from_str=params.get(OAIParams.FROM)
         until_str=params.get(OAIParams.UNTIL)
         set_str=params.get(OAIParams.SET)
+        #TODO parameter validation
+    
     #TODO rest of function
 
     return "<a>b</a>", 200, {}
 
 def list_identifiers(params: Dict[str, str]) -> Response:
     """retrieves headers of all records matching certain parameters"""
-    token=None
+    query_data: Dict[OAIParams, str]={OAIParams.VERB:OAIVerbs.LIST_IDS}
 
     #get parameters
     given_params=set(params.keys())
@@ -60,6 +63,7 @@ def list_identifiers(params: Dict[str, str]) -> Response:
         if given_params != {OAIParams.RES_TOKEN, OAIParams.VERB}: #resumption token is exclusive
             raise OAIBadArgument
         token=params[OAIParams.RES_TOKEN]
+        #TODO token processing and validation
     else:
         if OAIParams.META_PREFIX not in given_params:
             raise OAIBadArgument
@@ -71,6 +75,7 @@ def list_identifiers(params: Dict[str, str]) -> Response:
         from_str=params.get(OAIParams.FROM)
         until_str=params.get(OAIParams.UNTIL)
         set_str=params.get(OAIParams.SET)
+        #TODO paramter processing
 
     #TODO rest of function
         
