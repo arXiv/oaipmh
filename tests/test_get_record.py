@@ -13,6 +13,14 @@ def test_good_params(test_client):
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" not in text
 
+def test_bad_id(test_client):
+
+    params = {OAIParams.VERB: OAIVerbs.GET_RECORD, OAIParams.ID: "arXiv.org:2307.10651",  OAIParams.META_PREFIX: "oai_dc"}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code='idDoesNotExist'>" in text
+
 def test_extra_params(test_client):
     params = {OAIParams.VERB: OAIVerbs.GET_RECORD, OAIParams.ID: "oai:arXiv.org:2307.10651",  OAIParams.META_PREFIX: "oai_dc", "cookie":"chocolate"}
     response = test_client.get("/oai", query_string=params)
