@@ -1,18 +1,24 @@
 from typing import Dict
 
 from oaipmh.data.oai_errors import OAIBadArgument
-from oaipmh.data.oai_properties import OAIParams
+from oaipmh.data.oai_properties import OAIParams, OAIVerbs
 from oaipmh.serializers.output_formats import Response
+from oaipmh.requests.param_processing import process_identifier
 
 
 def get_record(params: Dict[str, str]) -> Response:
     """used to get data on a particular record in a particular metadata format"""
+    query_data: Dict[OAIParams, str]={OAIParams.VERB:OAIVerbs.GET_RECORD}
 
     # get parameters
     expected_params={OAIParams.ID, OAIParams.META_PREFIX, OAIParams.VERB}
     if set(params.keys()) != expected_params:
         raise OAIBadArgument
-    identifier=params[OAIParams.ID]
+    
+    identifier_str=params[OAIParams.ID]
+    arxiv_id=process_identifier(identifier_str)
+    query_data[OAIParams.ID]=identifier_str
+
     meta_type=params[OAIParams.META_PREFIX]
 
     #TODO rest of function

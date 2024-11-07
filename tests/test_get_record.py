@@ -2,7 +2,7 @@ from oaipmh.data.oai_properties import OAIParams, OAIVerbs
 
 def test_good_params(test_client):
 
-    params = {OAIParams.VERB: OAIVerbs.GET_RECORD, OAIParams.ID: "oai:example.org:record123",  OAIParams.META_PREFIX: "oai_dc"}
+    params = {OAIParams.VERB: OAIVerbs.GET_RECORD, OAIParams.ID: "oai:arXiv.org:2307.10651",  OAIParams.META_PREFIX: "oai_dc"}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
@@ -14,7 +14,7 @@ def test_good_params(test_client):
     assert "<error code='badArgument'>" not in text
 
 def test_extra_params(test_client):
-    params = {OAIParams.VERB: OAIVerbs.GET_RECORD, OAIParams.ID: "oai:example.org:record123",  OAIParams.META_PREFIX: "oai_dc", "cookie":"chocolate"}
+    params = {OAIParams.VERB: OAIVerbs.GET_RECORD, OAIParams.ID: "oai:arXiv.org:2307.10651",  OAIParams.META_PREFIX: "oai_dc", "cookie":"chocolate"}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
@@ -28,7 +28,7 @@ def test_extra_params(test_client):
 def test_missing_params(test_client):
 
     # missing metadata_prefix
-    params = {OAIParams.VERB: OAIVerbs.GET_RECORD, OAIParams.ID: "oai:example.org:record123"}
+    params = {OAIParams.VERB: OAIVerbs.GET_RECORD, OAIParams.ID: "oai:arXiv.org:2307.10651"}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)

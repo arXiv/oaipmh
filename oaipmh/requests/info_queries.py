@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Dict
 
 from oaipmh.data.oai_errors import OAIBadArgument
 from oaipmh.data.oai_properties import OAIParams, OAIVerbs
@@ -32,8 +32,8 @@ def list_metadata_formats(params: Dict[str, str]) -> Response:
 
 def list_sets(params: Dict[str, str]) -> Response:
     """used to retrieve the set structure of a repository"""
-    
-    query_data: Dict[OAIParams, Any]={OAIParams.VERB:OAIVerbs.LIST_SETS}
+
+    query_data: Dict[OAIParams, str]={OAIParams.VERB:OAIVerbs.LIST_SETS}
     given_params=set(params.keys())
     if OAIParams.RES_TOKEN in given_params:
         if given_params != {OAIParams.RES_TOKEN, OAIParams.VERB}: #resumption token is exclusive
