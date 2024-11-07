@@ -1,8 +1,9 @@
-from typing import Dict
+from typing import Dict, Any
 
 from oaipmh.data.oai_errors import OAIBadArgument
-from oaipmh.data.oai_properties import OAIParams
+from oaipmh.data.oai_properties import OAIParams, OAIVerbs
 from oaipmh.serializers.output_formats import Response
+from oaipmh.processors.create_set_list import produce_set_list
 
 def identify(params: Dict[str, str]) -> Response:
     """used to retrieve information about the repository"""
@@ -31,19 +32,19 @@ def list_metadata_formats(params: Dict[str, str]) -> Response:
 
 def list_sets(params: Dict[str, str]) -> Response:
     """used to retrieve the set structure of a repository"""
-
-    token=None
-    #get parameters
+    
+    query_data: Dict[OAIParams, Any]={OAIParams.VERB:OAIVerbs.LIST_SETS}
     given_params=set(params.keys())
     if OAIParams.RES_TOKEN in given_params:
         if given_params != {OAIParams.RES_TOKEN, OAIParams.VERB}: #resumption token is exclusive
             raise OAIBadArgument
-        token=params[OAIParams.RES_TOKEN]
+        token_str=params[OAIParams.RES_TOKEN]
+        #TODO token validation/processing
+        query_data[OAIParams.RES_TOKEN]=token_str
         #TODO will we ever hit this, or will we always return our set structure in full?
     else:
         if given_params != {OAIParams.VERB}: 
             raise OAIBadArgument
 
-    #TODO rest of function
+    return produce_set_list(query_data)
 
-    return "<a>b</a>", 200, {}

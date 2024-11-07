@@ -1,0 +1,20 @@
+{% extends "base.xml" %}
+
+{% block request_element %}
+    {{ macros.request_element(query_data) }}
+{% endblock %}
+
+{% block interior_xml %}
+    <ListSets>
+        {% for item in archives.values() %}
+            {{ set_item(item) }}
+        {% endfor %}
+    </ListSets>
+{% endblock %}
+
+{% macro set_item(item) %}
+    <set>
+        <setSpec>{{item.id}}</setSpec>
+        <setName>{{item.full_name}}</setName>
+    </set>
+{% endmacro %}
