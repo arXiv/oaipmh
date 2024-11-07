@@ -1,7 +1,7 @@
 
 def test_good_params(test_client):
 
-    params = {"verb": "GetRecord", "identifier": "oai:example.org:record123",  "metadata_prefix": "oai_dc"}
+    params = {"verb": "GetRecord", "identifier": "oai:example.org:record123",  "metadataPrefix": "oai_dc"}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
@@ -13,7 +13,7 @@ def test_good_params(test_client):
     assert "<error code='badArgument'>" not in text
 
 def test_extra_params(test_client):
-    params = {"verb": "GetRecord", "identifier": "oai:example.org:record123",  "metadata_prefix": "oai_dc", "cookie":"chocolate"}
+    params = {"verb": "GetRecord", "identifier": "oai:example.org:record123",  "metadataPrefix": "oai_dc", "cookie":"chocolate"}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
@@ -38,8 +38,8 @@ def test_missing_params(test_client):
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" in text
 
-    # missing metadata_prefix
-    params = {"verb": "GetRecord", "metadata_prefix": "oai_dc"}
+    # missing identifier
+    params = {"verb": "GetRecord", "metadataPrefix": "oai_dc"}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
