@@ -30,4 +30,20 @@ def list_metadata_formats(params: Dict[str, str]) -> Response:
         return "<a>b</a>", 200, {}
 
 def list_sets(params: Dict[str, str]) -> Response:
+    """used to retrieve the set structure of a repository"""
+
+    token=None
+    #get parameters
+    given_params=set(params.keys())
+    if OAIParams.RES_TOKEN in given_params:
+        if given_params != {OAIParams.RES_TOKEN, OAIParams.VERB}: #resumption token is exclusive
+            raise OAIBadArgument
+        token=params[OAIParams.RES_TOKEN]
+        #TODO will we ever hit this, or will we always return our set structure in full?
+    else:
+        if given_params != {OAIParams.VERB}: 
+            raise OAIBadArgument
+
+    #TODO rest of function
+
     return "<a>b</a>", 200, {}
