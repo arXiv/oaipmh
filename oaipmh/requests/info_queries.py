@@ -12,7 +12,22 @@ def identify(params: Dict[str, str]) -> Response:
     return "<a>b</a>", 200, {}
 
 def list_metadata_formats(params: Dict[str, str]) -> Response:
-    return "<a>b</a>", 200, {}
+    """used to retrieve the metadata formats available from a repository.
+    An optional argument restricts the request to the formats available for a specific item.
+    """
+
+    given_params=set(params.keys())
+    if OAIParams.ID in given_params: #give formats for one item
+        if given_params != {OAIParams.VERB, OAIParams.ID}:
+            raise OAIBadArgument
+        #TODO get formats for an item
+        return "<a>b</a>", 200, {}
+
+    else: #give formats repository supports
+        if given_params != {OAIParams.VERB}:
+            raise OAIBadArgument
+        #TODO get formats for repository
+        return "<a>b</a>", 200, {}
 
 def list_sets(params: Dict[str, str]) -> Response:
     return "<a>b</a>", 200, {}
