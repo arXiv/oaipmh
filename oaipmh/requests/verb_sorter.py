@@ -5,6 +5,7 @@ from oaipmh.requests.info_queries import identify, list_metadata_formats, list_s
 from oaipmh.requests.data_queries import get_record, list_identifiers, list_records
 from oaipmh.serializers.output_formats import Response
 from oaipmh.data.oai_errors import OAIBadVerb
+from oaipmh.data.oai_properties import OAIVerbs
 
 def verb_sorter(params: Dict[str, str]) -> Response:
     """
@@ -15,17 +16,17 @@ def verb_sorter(params: Dict[str, str]) -> Response:
     """
     verb = params.get("verb", "")
     match verb:
-        case "GetRecord":
+        case OAIVerbs.GET_RECORD:
             return get_record(params)
-        case "ListRecords":
+        case OAIVerbs.LIST_RECORDS:
             return list_records(params)
-        case "ListIdentifiers":
+        case OAIVerbs.LIST_IDS:
             return list_identifiers(params)
-        case "Identify":
+        case OAIVerbs.IDENTIFY:
             return identify(params)
-        case "ListMetadataFormats":
+        case OAIVerbs.LIST_META_FORMATS:
             return list_metadata_formats(params)
-        case "ListSets":
+        case OAIVerbs.LIST_SETS:
             return list_sets(params)
         case _:
             raise OAIBadVerb #dont keep invalid verb
