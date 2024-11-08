@@ -20,6 +20,7 @@ def test_bad_id(test_client):
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code='idDoesNotExist'>" in text
+    assert "All identifiers start with:" in text
 
 def test_extra_params(test_client):
     params = {OAIParams.VERB: OAIVerbs.GET_RECORD, OAIParams.ID: "oai:arXiv.org:2307.10651",  OAIParams.META_PREFIX: "oai_dc", "cookie":"chocolate"}
@@ -27,11 +28,13 @@ def test_extra_params(test_client):
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" in text
+    assert "Parameters provided did not match expected." in text
 
     response = test_client.post("/oai", data=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" in text
+    assert "Parameters provided did not match expected." in text
 
 def test_missing_params(test_client):
 
@@ -41,11 +44,13 @@ def test_missing_params(test_client):
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" in text
+    assert "Parameters provided did not match expected." in text
 
     response = test_client.post("/oai", data=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" in text
+    assert "Parameters provided did not match expected." in text
 
     # missing identifier
     params = {OAIParams.VERB: OAIVerbs.GET_RECORD, OAIParams.META_PREFIX: "oai_dc"}
@@ -53,8 +58,10 @@ def test_missing_params(test_client):
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" in text
+    assert "Parameters provided did not match expected." in text
 
     response = test_client.post("/oai", data=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" in text
+    assert "Parameters provided did not match expected." in text

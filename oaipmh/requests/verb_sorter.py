@@ -29,4 +29,4 @@ def verb_sorter(params: Dict[str, str]) -> Response:
         case OAIVerbs.LIST_SETS:
             return list_sets(params)
         case _:
-            raise OAIBadVerb #dont keep invalid verb
+            raise OAIBadVerb(f"Invalid verb provided") #dont keep invalid verb

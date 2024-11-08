@@ -44,11 +44,13 @@ def test_extra_params(test_client):
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" in text
+    assert "Unallowed parameter." in text
 
     response = test_client.post("/oai", data=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" in text
+    assert "Unallowed parameter." in text
 
 def test_token_params(test_client):
     #correct params
@@ -69,8 +71,10 @@ def test_token_params(test_client):
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" in text
+    assert "No other paramters allowed with" in text
 
     response = test_client.post("/oai", data=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" in text
+    assert "No other paramters allowed with" in text

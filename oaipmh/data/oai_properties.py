@@ -14,3 +14,9 @@ class OAIVerbs:
     IDENTIFY = "Identify"
     LIST_META_FORMATS = "ListMetadataFormats"
     LIST_SETS = "ListSets"
+
+class MetadataFormat:
+    def __init__(self, prefix: str, schema: str, namespace: str):
+        self.prefix = prefix
+        self.schema = schema
+        self.namespace = namespace

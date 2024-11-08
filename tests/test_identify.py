@@ -18,8 +18,10 @@ def test_extra_params(test_client):
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" in text
+    assert "No other parameters allowed" in text
 
     response = test_client.post("/oai", data=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" in text
+    assert "No other parameters allowed" in text

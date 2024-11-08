@@ -1,9 +1,13 @@
 {% extends "base.xml" %}
 
 {% block request_element %}
-    {{ macros.request_element() }}
+    {% if error.query_params %}
+        {{ macros.request_element(error.query_params) }}
+    {% else %}
+        {{ macros.request_element() }}
+    {% endif %}
 {% endblock %}
 
 {% block interior_xml %}
-    <error code='{{error.code}}'>{{error.description}}</error>
+    <error code='{{error.code}}'>{{error.description}}{% if error.reason %} Reason: {{ error.reason }}{% endif %}</error>
 {% endblock %}
