@@ -1,5 +1,9 @@
 from typing import Dict
+from datetime import timezone, datetime
 
+from flask import render_template
+
+from oaipmh.data.oai_config import SUPPORTED_METADATA_FORMATS
 from oaipmh.data.oai_errors import OAIBadArgument
 from oaipmh.data.oai_properties import OAIParams, OAIVerbs
 from oaipmh.serializers.output_formats import Response
@@ -38,7 +42,13 @@ def list_metadata_formats(params: Dict[str, str]) -> Response:
         if given_params != {OAIParams.VERB}:
             raise OAIBadArgument(f"Only allowed parameters are {', '.join(str(param) for param in expected_params)}")
         #TODO get formats for repository
-        return "<a>b</a>", 200, {}
+        response=render_template("metaformats.xml", 
+            response_date=datetime.now(timezone.utc),
+            query_params=query_data,
+            formats=SUPPORTED_METADATA_FORMATS
+            )
+        headers={"Content-Type":"application/xml"}
+        return response, 200, headers
 
 def list_sets(params: Dict[str, str]) -> Response:
     """used to retrieve the set structure of a repository"""
