@@ -1,5 +1,8 @@
-
+from datetime import datetime, timezone
 from oaipmh.data.oai_properties import MetadataFormat
+
+#TODO do we want to change this
+EARLIEST_DATE=datetime(2007, 5, 23, 0, 0, tzinfo=timezone.utc) 
 
 SUPPORTED_METADATA_FORMATS={
     "oai_dc":MetadataFormat(
@@ -17,7 +20,7 @@ SUPPORTED_METADATA_FORMATS={
         schema="http://arxiv.org/OAI/arXivOld.xsd",
         namespace="http://arxiv.org/OAI/arXivOld/"
     ),
-    "arXiv":MetadataFormat(
+    "arXivRaw":MetadataFormat(
         prefix="arXivRaw",
         schema="http://arxiv.org/OAI/arXivRaw.xsd",
         namespace="http://arxiv.org/OAI/arXivRaw/"

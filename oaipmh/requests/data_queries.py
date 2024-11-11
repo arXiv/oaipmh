@@ -1,7 +1,8 @@
 from typing import Dict
-from datetime import datetime
+import re
+from datetime import datetime, timezone
 
-from oaipmh.data.oai_config import SUPPORTED_METADATA_FORMATS
+from oaipmh.data.oai_config import SUPPORTED_METADATA_FORMATS, EARLIEST_DATE
 from oaipmh.data.oai_errors import OAIBadArgument, OAIBadFormat
 from oaipmh.data.oai_properties import OAIParams, OAIVerbs
 from oaipmh.serializers.output_formats import Response
@@ -43,28 +44,62 @@ def _list_data(params: Dict[str, str], just_ids: bool)-> Response:
     """runs both list queries. just_ids true for list identifiers, false for list records"""
     query_data: Dict[OAIParams, str]={OAIParams.VERB:OAIVerbs.LIST_IDS}
 
-    #get parameters
+    #parameter processing
     given_params=set(params.keys())
-    if OAIParams.RES_TOKEN in given_params:
+    if OAIParams.RES_TOKEN in given_params: #using resumption token
         if given_params != {OAIParams.RES_TOKEN, OAIParams.VERB}: #resumption token is exclusive
             raise OAIBadArgument(f"No other paramters allowed with {OAIParams.RES_TOKEN}")
         token=params[OAIParams.RES_TOKEN]
         #TODO token processing and validation
-    else:
+
+    else: #using request parameters
+        #correct parameters present
         if OAIParams.META_PREFIX not in given_params:
             raise OAIBadArgument(f"{OAIParams.META_PREFIX} required.")
         allowed_params={OAIParams.VERB,OAIParams.META_PREFIX, OAIParams.FROM, OAIParams.UNTIL, OAIParams.SET }
         if given_params-allowed_params: #no extra keys allowed
             raise OAIBadArgument(f"Unallowed parameter. Allowed parameters: {', '.join(str(param) for param in allowed_params)}")
 
+        #metadata
         meta_type_str=params[OAIParams.META_PREFIX]
         if meta_type_str not in SUPPORTED_METADATA_FORMATS:
             raise OAIBadFormat(reason="Did not recognize requested format", query_params=query_data)
         meta_type=SUPPORTED_METADATA_FORMATS[meta_type_str]
-        
+        query_data[OAIParams.META_PREFIX]=meta_type_str
+
+        #dates
         from_str=params.get(OAIParams.FROM)
+        if from_str:
+            try:
+                if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", from_str):
+                    raise ValueError
+                start_date=datetime.strptime(from_str, "%Y-%m-%d")
+                start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc)
+                query_data[OAIParams.FROM]=from_str
+            except Exception:
+                raise OAIBadArgument("from date format must be YYYY-MM-DD")
+        else:
+            start_date=EARLIEST_DATE
+
         until_str=params.get(OAIParams.UNTIL)
+        if until_str:
+            try:
+                if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", until_str):
+                    raise ValueError
+                end_date=datetime.strptime(until_str, "%Y-%m-%d")
+                end_date = end_date.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc)
+                query_data[OAIParams.UNTIL]=until_str
+            except Exception:
+                raise OAIBadArgument("until date format must be YYYY-MM-DD")
+        else:
+            end_date=datetime.now(timezone.utc)
+
+        #sets
         set_str=params.get(OAIParams.SET)
         #TODO paramter processing
+
+    #TODO check that combined parameters are valid (dates are okay)
+
+    #TODO rest of function
 
     return "<a>b</a>", 200, {}
