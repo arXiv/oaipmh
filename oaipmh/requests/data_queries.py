@@ -1,6 +1,9 @@
-from typing import Dict
+from typing import Dict, Union
 import re
 from datetime import datetime, timezone
+
+from arxiv.taxonomy.definitions import GROUPS, ARCHIVES_ACTIVE, CATEGORIES_ACTIVE
+from arxiv.taxonomy.category import Group, Archive, Category
 
 from oaipmh.data.oai_config import SUPPORTED_METADATA_FORMATS, EARLIEST_DATE
 from oaipmh.data.oai_errors import OAIBadArgument, OAIBadFormat
@@ -8,6 +11,7 @@ from oaipmh.data.oai_properties import OAIParams, OAIVerbs
 from oaipmh.serializers.output_formats import Response
 from oaipmh.requests.param_processing import process_identifier
 
+DATE_REGEX = r"\d{4}-\d{2}-\d{2}"
 
 def get_record(params: Dict[str, str]) -> Response:
     """used to get data on a particular record in a particular metadata format"""
@@ -27,7 +31,7 @@ def get_record(params: Dict[str, str]) -> Response:
         raise OAIBadFormat(reason="Did not recognize requested format", query_params=query_data)
     meta_type=SUPPORTED_METADATA_FORMATS[meta_type_str]
 
-    #TODO rest of function
+    #TODO paramters done, do rest of function
 
     return "<a>b</a>", 200, {}
 
@@ -71,7 +75,7 @@ def _list_data(params: Dict[str, str], just_ids: bool)-> Response:
         from_str=params.get(OAIParams.FROM)
         if from_str:
             try:
-                if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", from_str):
+                if not re.fullmatch(DATE_REGEX, from_str):
                     raise ValueError
                 start_date=datetime.strptime(from_str, "%Y-%m-%d")
                 start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc)
@@ -84,7 +88,7 @@ def _list_data(params: Dict[str, str], just_ids: bool)-> Response:
         until_str=params.get(OAIParams.UNTIL)
         if until_str:
             try:
-                if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", until_str):
+                if not re.fullmatch(DATE_REGEX, until_str):
                     raise ValueError
                 end_date=datetime.strptime(until_str, "%Y-%m-%d")
                 end_date = end_date.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc)
@@ -94,12 +98,46 @@ def _list_data(params: Dict[str, str], just_ids: bool)-> Response:
         else:
             end_date=datetime.now(timezone.utc)
 
-        #sets
+        #sets   
         set_str=params.get(OAIParams.SET)
-        #TODO paramter processing
+        if set_str:
+            rq_set= _parse_set(set_str)
+            query_data[OAIParams.SET]=set_str
 
-    #TODO check that combined parameters are valid (dates are okay)
+    #TODO check that combined parameters are valid (dates are okay, sets are active and not test) combined with token data
 
     #TODO rest of function
 
     return "<a>b</a>", 200, {}
+
+def _parse_set(set_str:str)-> Union[Group, Archive, Category]:
+    """turns OAI style string into taxonomy item
+        validates item
+    """
+    set_parts=set_str.split(":")
+    match len(set_parts):
+        case 1: #asking for a group
+            rq_set = GROUPS.get(f'grp_{set_str}')
+            if not rq_set:
+                raise OAIBadArgument("Set does not exist")
+        case 2: #archive (including archive as category)
+            grp_str, archive_str = set_parts
+            rq_set = ARCHIVES_ACTIVE.get(archive_str)
+            if not rq_set or f'grp_{grp_str}' != rq_set.in_group:
+                raise OAIBadArgument("Set does not exist")
+        case 3: #full category
+            grp_str, archive_str, category_suffix = set_parts
+            cat_str = f"{archive_str}.{category_suffix}"
+            if cat_str not in CATEGORIES_ACTIVE:
+                raise OAIBadArgument("Set does not exist")
+            rq_set= CATEGORIES_ACTIVE[cat_str]
+            archive= rq_set.get_archive()
+            if archive_str!= archive.id or f'grp_{grp_str}' != archive.in_group:
+                raise OAIBadArgument("Set does not exist")
+        case _:
+            raise OAIBadArgument("Set has too many levels")
+        
+    return rq_set
+
+
+

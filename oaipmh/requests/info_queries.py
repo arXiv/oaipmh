@@ -41,7 +41,6 @@ def list_metadata_formats(params: Dict[str, str]) -> Response:
     else: #give formats repository supports
         if given_params != {OAIParams.VERB}:
             raise OAIBadArgument(f"Only allowed parameters are {', '.join(str(param) for param in expected_params)}")
-        #TODO get formats for repository
         response=render_template("metaformats.xml", 
             response_date=datetime.now(timezone.utc),
             query_params=query_data,
@@ -66,5 +65,5 @@ def list_sets(params: Dict[str, str]) -> Response:
         if given_params != {OAIParams.VERB}: 
             raise OAIBadArgument(f"No other parameters allowed")
 
-    return produce_set_list(query_data)
+    return produce_set_list(query_data) #TODO update with categories
 
