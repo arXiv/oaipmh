@@ -51,19 +51,14 @@ def list_metadata_formats(params: Dict[str, str]) -> Response:
 
 def list_sets(params: Dict[str, str]) -> Response:
     """used to retrieve the set structure of a repository"""
-
     query_data: Dict[OAIParams, str]={OAIParams.VERB:OAIVerbs.LIST_SETS}
     given_params=set(params.keys())
     if OAIParams.RES_TOKEN in given_params:
         if given_params != {OAIParams.RES_TOKEN, OAIParams.VERB}: #resumption token is exclusive
             raise OAIBadArgument(f"No other paramters allowed with {OAIParams.RES_TOKEN}")
-        token_str=params[OAIParams.RES_TOKEN]
-        #TODO token validation/processing
-        query_data[OAIParams.RES_TOKEN]=token_str
-        #TODO will we ever hit this, or will we always return our set structure in full?
+        raise OAIBadArgument(f"Invalid token") #we never give out a resumption token for sets
     else:
         if given_params != {OAIParams.VERB}: 
             raise OAIBadArgument(f"No other parameters allowed")
-
-    return produce_set_list(query_data) #TODO update with categories
+    return produce_set_list(query_data) 
 

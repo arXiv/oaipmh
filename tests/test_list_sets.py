@@ -4,6 +4,18 @@ from arxiv.taxonomy.definitions import GROUPS, ARCHIVES, CATEGORIES
 from oaipmh.data.oai_properties import OAIParams, OAIVerbs
 from oaipmh.processors.create_set_list import make_set_str
 
+def test_output(test_client):
+    #general case
+    params = {OAIParams.VERB: OAIVerbs.LIST_SETS}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "test" not in text #test items
+    assert "adap-org" not in text #inactive
+    assert "<setSpec>math</setSpec>" in text
+    assert "<setSpec>math:math</setSpec>" in text
+    assert "<setSpec>math:math:NA</setSpec>" in text
+
 def test_good_params(test_client):
     #general case
     params = {OAIParams.VERB: OAIVerbs.LIST_SETS}

@@ -6,15 +6,21 @@
 
 {% block interior_xml %}
     <ListSets>
+        {% for item in groups.values() %}
+            {{ set_item(item, to_set) }}
+        {% endfor %}
         {% for item in archives.values() %}
-            {{ set_item(item) }}
+            {{ set_item(item, to_set) }}
+        {% endfor %}
+        {% for item in categories.values() %}
+            {{ set_item(item, to_set) }}
         {% endfor %}
     </ListSets>
 {% endblock %}
 
-{% macro set_item(item) %}
+{% macro set_item(item, to_set) %}
     <set>
-        <setSpec>{{item.id}}</setSpec>
+        <setSpec>{{to_set(item)}}</setSpec>
         <setName>{{item.full_name}}</setName>
     </set>
 {% endmacro %}
