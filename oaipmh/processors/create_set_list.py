@@ -1,8 +1,9 @@
 from datetime import datetime, timezone
-from typing import Dict, Any
+from typing import Dict, Any, Union
 
 from flask import render_template
 
+from arxiv.taxonomy.category import Group, Archive, Category
 from arxiv.taxonomy.definitions import ARCHIVES_ACTIVE
 
 from oaipmh.data.oai_properties import OAIParams
@@ -17,3 +18,15 @@ def produce_set_list(query_data: Dict[OAIParams, Any]) -> Response:
                 query_data=query_data,
                 archives=ARCHIVES_ACTIVE)
     return response, 200, {}
+
+def make_set_str(item: Union[Group, Archive, Category]) -> str:
+    """helper function to convert arXiv category data into OAI set structure
+    the grp_ prefix should be removed from group ids
+    """
+    if isinstance(item, Group):
+        return item.id[4:]
+    elif isinstance(item, Archive):
+        return f"{item.in_group[4:]}:{item.id}"
+    elif isinstance(item, Category):
+        archive=item.get_archive()
+        return f"{archive.in_group[4:]}:{item.id.replace('.',':')}"

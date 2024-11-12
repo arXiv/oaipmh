@@ -1,5 +1,8 @@
 
+from arxiv.taxonomy.definitions import GROUPS, ARCHIVES, CATEGORIES
+
 from oaipmh.data.oai_properties import OAIParams, OAIVerbs
+from oaipmh.processors.create_set_list import make_set_str
 
 def test_good_params(test_client):
     #general case
@@ -40,3 +43,13 @@ def test_extra_params(test_client):
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" in text
     assert "No other parameters allowed" in text
+
+def test_make_set_str():
+    assert 'physics'==make_set_str(GROUPS['grp_physics'])
+    assert 'math'==make_set_str(GROUPS['grp_math'])
+    assert 'math:math' == make_set_str(ARCHIVES['math'])
+    assert 'physics:hep-ph' == make_set_str(ARCHIVES['hep-ph'])
+    assert 'physics:physics:flu-dyn' == make_set_str(CATEGORIES['physics.flu-dyn'])
+    assert 'cs:cs:GT' == make_set_str(CATEGORIES['cs.GT'])
+    assert 'physics:astro-ph'==make_set_str(CATEGORIES['astro-ph'])
+  
