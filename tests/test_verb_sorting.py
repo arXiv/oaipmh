@@ -18,28 +18,28 @@ def test_get_record(test_client):
 def test_list_records(test_client):
     params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.META_PREFIX: "oai_dc"}
     
-    with patch('oaipmh.requests.routes.list_records', return_value=("working", 200, {})) as mock_list_records:
+    with patch('oaipmh.requests.routes.list_data', return_value=("working", 200, {})) as mock_list_records:
         response = test_client.get("/oai", query_string=params)
         assert response.status_code == 200
-        mock_list_records.assert_called_once_with(params)
+        mock_list_records.assert_called_once_with(params, False)
 
-    with patch('oaipmh.requests.routes.list_records', return_value=("working", 200, {})) as mock_list_records:
+    with patch('oaipmh.requests.routes.list_data', return_value=("working", 200, {})) as mock_list_records:
         response = test_client.post("/oai", data=params)
         assert response.status_code == 200
-        mock_list_records.assert_called_once_with(params)
+        mock_list_records.assert_called_once_with(params, False)
 
 def test_list_identifiers(test_client):
     params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc"}
     
-    with patch('oaipmh.requests.routes.list_identifiers', return_value=("working", 200, {})) as mock_list_identifiers:
+    with patch('oaipmh.requests.routes.list_data', return_value=("working", 200, {})) as mock_list_identifiers:
         response = test_client.get("/oai", query_string=params)
         assert response.status_code == 200
-        mock_list_identifiers.assert_called_once_with(params)
+        mock_list_identifiers.assert_called_once_with(params, True)
 
-    with patch('oaipmh.requests.routes.list_identifiers', return_value=("working", 200, {})) as mock_list_identifiers:
+    with patch('oaipmh.requests.routes.list_data', return_value=("working", 200, {})) as mock_list_identifiers:
         response = test_client.post("/oai", data=params)
         assert response.status_code == 200
-        mock_list_identifiers.assert_called_once_with(params)
+        mock_list_identifiers.assert_called_once_with(params, True)
 
 def test_identify(test_client):
     params = {OAIParams.VERB: OAIVerbs.IDENTIFY}

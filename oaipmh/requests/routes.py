@@ -2,7 +2,7 @@ from typing import Dict
 from flask import Blueprint, request
 
 from oaipmh.requests.info_queries import identify, list_metadata_formats, list_sets
-from oaipmh.requests.data_queries import get_record, list_identifiers, list_records
+from oaipmh.requests.data_queries import get_record, list_data
 from oaipmh.serializers.output_formats import Response
 from oaipmh.data.oai_errors import OAIBadVerb
 from oaipmh.data.oai_properties import OAIVerbs
@@ -25,9 +25,9 @@ def oai() -> Response:
         case OAIVerbs.GET_RECORD:
             response, code, headers= get_record(params)
         case OAIVerbs.LIST_RECORDS:
-            response, code, headers= list_records(params)
+            response, code, headers= list_data(params, False)
         case OAIVerbs.LIST_IDS:
-            response, code, headers= list_identifiers(params)
+            response, code, headers= list_data(params, True)
         case OAIVerbs.IDENTIFY:
             response, code, headers= identify(params)
         case OAIVerbs.LIST_META_FORMATS:

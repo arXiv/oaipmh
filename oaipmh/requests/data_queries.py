@@ -35,16 +35,7 @@ def get_record(params: Dict[str, str]) -> Response:
 
     return "<a>b</a>", 200, {}
 
-def list_records(params: Dict[str, str]) -> Response:
-    """used to harvest records from a repository with support for selective harvesting"""
-    return _list_data(params, False)
-
-def list_identifiers(params: Dict[str, str]) -> Response:
-    """retrieves headers of all records matching certain parameters"""
-    return _list_data(params, True)
-
-
-def _list_data(params: Dict[str, str], just_ids: bool)-> Response:
+def list_data(params: Dict[str, str], just_ids: bool)-> Response:
     """runs both list queries. just_ids true for list identifiers, false for list records"""
     query_data: Dict[OAIParams, str]={OAIParams.VERB:OAIVerbs.LIST_IDS}
 
