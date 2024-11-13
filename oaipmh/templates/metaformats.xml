@@ -1,0 +1,25 @@
+{% extends "base.xml" %}
+
+{% macro metadata_format(format) %}
+<metadataFormat>
+    <metadataPrefix>{{ format.prefix }}</metadataPrefix>
+    <schema>{{ format.schema }}</schema>
+    <metadataNamespace>{{ format.namespace }}</metadataNamespace>
+</metadataFormat>
+{% endmacro %}
+
+{% block request_element %}
+        {{ macros.request_element(query_params) }}
+{% endblock %}
+
+{% block interior_xml %}
+    <ListMetadataFormats>
+            {% for item in formats.values() %}
+                {{ metadata_format(item) }}
+            {% endfor %}
+    </ListMetadataFormats>
+{% endblock %}
+
+
+
+

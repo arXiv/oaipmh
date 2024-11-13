@@ -1,14 +1,17 @@
 import logging
+from datetime import datetime, timezone
 
-from flask import Flask
+from flask import Flask, render_template
 from flask_s3 import FlaskS3
 from flask.logging import default_handler
+from werkzeug.exceptions import HTTPException
 
 from arxiv.base import Base
 from arxiv.db import config_query_timing, configure_db
 
+from oaipmh.data.oai_errors import OAIException
 from oaipmh.config import Settings
-from oaipmh import routes
+from oaipmh.requests import routes
 
 s3 = FlaskS3()
 
@@ -32,6 +35,20 @@ def create_web_app(**kwargs) -> Flask: # type: ignore
 
     app.register_blueprint(routes.blueprint)
     s3.init_app(app)
+
+    @app.errorhandler(OAIException)
+    def handle_oai_error(e):
+        response=render_template("errors.xml", 
+                response_date=datetime.now(timezone.utc),
+                error=e)
+        headers={"Content-Type":"application/xml"}
+        return response, 200, headers
+    
+    #TODO make this actually trigger
+    @app.errorhandler(HTTPException)
+    def handle_http_error(e):
+        print("main error handler ran!")
+        return e.description, e.code, {}
 
     app.jinja_env.trim_blocks = True
     app.jinja_env.lstrip_blocks = True
