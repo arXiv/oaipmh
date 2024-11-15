@@ -129,7 +129,24 @@ def test_bad_date_params(test_client):
     assert "until date format must be YYYY-MM-DD" in text
 
 def test_bad_set_params(test_client):
+    #not a valid set combo
     params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.SET: "math:physics"}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code='badArgument'>"  in text
+    assert "Set does not exist" in text
+
+    #test category
+    params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.SET: "test:test"}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code='badArgument'>"  in text
+    assert "Invalid set request" in text
+
+    #inactive category
+    params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.SET: "physics:adap-org"}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)

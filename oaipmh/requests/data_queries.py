@@ -42,15 +42,15 @@ def list_data(params: Dict[str, str], just_ids: bool)-> Response:
 
     #parameter processing
     given_params=set(params.keys())
-    if OAIParams.RES_TOKEN in given_params: #using resumption token
+    if OAIParams.RES_TOKEN in given_params: #get parameters from token
         if given_params != {OAIParams.RES_TOKEN, OAIParams.VERB}: #resumption token is exclusive
             raise OAIBadArgument(f"No other paramters allowed with {OAIParams.RES_TOKEN}")
         token=params[OAIParams.RES_TOKEN]
-        token_params, start_val=ResToken.from_token(token) #set request parameters from token
+        token_params, start_val=ResToken.from_token(token) 
         query_data[OAIParams.RES_TOKEN]=token
         if params[OAIParams.VERB] != token_params[OAIParams.VERB]:
             raise OAIBadResumptionToken("token from different verb", query_data)
-        params=token_params
+        params=token_params #set request parameters from token
         given_params=set(params.keys())
      
     #process request parameters
@@ -100,8 +100,17 @@ def list_data(params: Dict[str, str], just_ids: bool)-> Response:
     if set_str:
         rq_set= _parse_set(set_str)
         query_data[OAIParams.SET]=set_str
-
+        if not rq_set.is_active or 'test' in rq_set.id:
+            raise OAIBadArgument("Invalid set request")
+    else:
+        rq_set=None
     #TODO check that combined parameters are valid (dates are okay, sets are active and not test) combined with token data
+
+    #from and until flipped
+
+    #start too early
+
+    #until too late
 
     #TODO rest of function
 
