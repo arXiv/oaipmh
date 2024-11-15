@@ -1,8 +1,9 @@
 from datetime import datetime, timezone
 from oaipmh.data.oai_properties import MetadataFormat
 
-#TODO do we want to change this
-EARLIEST_DATE=datetime(2007, 5, 23, 0, 0, tzinfo=timezone.utc) 
+#TODO test/ determine limits
+RECORDS_LIMIT=2000
+IDENTIFIERS_LIMIT=5000 
 
 SUPPORTED_METADATA_FORMATS={
     "oai_dc":MetadataFormat(
@@ -26,3 +27,12 @@ SUPPORTED_METADATA_FORMATS={
         namespace="http://arxiv.org/OAI/arXivRaw/"
     ),
 }
+
+#required definiton
+REPOSITORY_NAME='arXiv'
+BASE_URL='https://arxiv.org/oai'
+PROTOCOL_VERSION='2.0'
+EARLIEST_DATE=datetime(2007, 5, 23, 0, 0, tzinfo=timezone.utc) #TODO change?
+DELETED_RECORD='persistent'
+GRANULARITY='YYYY-MM-DD'
+ADMIN_EMAIL='help@arxiv.org'

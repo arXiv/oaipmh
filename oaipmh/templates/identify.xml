@@ -1,0 +1,56 @@
+{% extends "base.xml" %}
+
+{% block request_element %}
+        {{ macros.request_element(query_params) }}
+{% endblock %}
+
+{% block interior_xml %}
+    <Identify>
+        <repositoryName>{{config_data.REPOSITORY_NAME}}</repositoryName>
+        <baseURL>{{config_data.BASE_URL}}</baseURL>
+        <protocolVersion>{{config_data.PROTOCOL_VERSION}}</protocolVersion>
+        <adminEmail>{{config_data.ADMIN_EMAIL}}</adminEmail>
+        <earliestDatestamp>{{config_data.EARLIEST_DATE.strftime('%Y-%m-%d')}}</earliestDatestamp>
+        <deletedRecord>{{config_data.DELETED_RECORD}}</deletedRecord>
+        <granularity>{{config_data.GRANULARITY}}</granularity>
+        {{arXiv_desc()}}
+        {{logo_desc()}}
+    </Identify>
+{% endblock %}
+
+{% macro arXiv_desc() %}
+    <description>
+        <eprints xmlns="http://www.openarchives.org/OAI/1.1/eprints" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/1.1/eprints http://www.openarchives.org/OAI/1.1/eprints.xsd">
+            <content>
+                <text>Author self-archived e-prints</text>
+            </content>
+            <metadataPolicy>
+                <text>Metadata harvesting permitted through OAI interface</text>
+                <URL>http://arxiv.org/help/oa/metadataPolicy</URL>
+            </metadataPolicy>
+            <dataPolicy>
+                <text>Full-content harvesting not permitted (except by special arrangement)</text>
+                <URL>http://arxiv.org/help/oa/dataPolicy</URL>
+            </dataPolicy>
+            <submissionPolicy>
+                <text>Author self-submission preferred, submissions screened for appropriateness.</text>
+                <URL>http://arxiv.org/help/submit</URL>
+            </submissionPolicy>
+        </eprints>
+    </description>
+{% endmacro %}
+
+{% macro logo_desc() %}
+    <description>
+        <branding xmlns="http://www.openarchives.org/OAI/2.0/branding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/branding/ http://www.openarchives.org/OAI/2.0/branding.xsd">
+            <collectionIcon>
+                <url>http://arxiv.org/OAI/arXivLogo.png</url>
+                <link>http://arxiv.org/</link>
+                <title>arXiv e-print archive</title>
+                <width>88</width>
+                <height>31</height>
+            </collectionIcon>
+            <metadataRendering metadataNamespace="http://www.openarchives.org/OAI/2.0/oai_dc/" mimeType="text/xsl">http://arxiv.org/OAI/arXivMetadata.xsl</metadataRendering>
+        </branding>
+    </description>
+{% endmacro %}
