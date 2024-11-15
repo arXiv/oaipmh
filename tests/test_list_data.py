@@ -128,6 +128,31 @@ def test_bad_date_params(test_client):
     assert "<error code='badArgument'>"  in text
     assert "until date format must be YYYY-MM-DD" in text
 
+    #start later than end
+    params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.UNTIL: "2024-02-08", OAIParams.FROM:"2024-03-05", OAIParams.SET: "math"}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code='badArgument'>"  in text
+    assert "until date must be greater than or equal to from date" in text
+
+    #start too early
+    params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.UNTIL: "2024-02-08", OAIParams.FROM:"2001-03-05", OAIParams.SET: "math"}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code='badArgument'>"  in text
+    assert "start date too early" in text
+
+    #dates in the future
+    params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.UNTIL: "2624-02-08", OAIParams.FROM:"2024-03-05", OAIParams.SET: "math"}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code='badArgument'>"  in text
+    assert "until date too late" in text
+    
+
 def test_bad_set_params(test_client):
     #not a valid set combo
     params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.SET: "math:physics"}
@@ -263,8 +288,6 @@ def test_token_params(test_client):
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code='badResumptionToken'" in text
-
-
 
 def test_set_parser():
     #good values

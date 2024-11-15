@@ -1,6 +1,6 @@
 from typing import Dict, Union
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from arxiv.taxonomy.definitions import GROUPS, ARCHIVES_ACTIVE, CATEGORIES_ACTIVE
 from arxiv.taxonomy.category import Group, Archive, Category
@@ -31,6 +31,7 @@ def get_record(params: Dict[str, str]) -> Response:
     if meta_type_str not in SUPPORTED_METADATA_FORMATS:
         raise OAIBadFormat(reason="Did not recognize requested format", query_params=query_data)
     meta_type=SUPPORTED_METADATA_FORMATS[meta_type_str]
+    query_data[OAIParams.META_PREFIX]=meta_type_str
 
     #TODO paramters done, do rest of function
 
@@ -75,7 +76,7 @@ def list_data(params: Dict[str, str], just_ids: bool)-> Response:
             if not re.fullmatch(DATE_REGEX, from_str):
                 raise ValueError
             start_date=datetime.strptime(from_str, "%Y-%m-%d")
-            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc)
+            start_date = start_date.replace(hour=0, minute=0, second=0, tzinfo=timezone.utc)
             query_data[OAIParams.FROM]=from_str
         except Exception:
             raise OAIBadArgument("from date format must be YYYY-MM-DD")
@@ -88,12 +89,12 @@ def list_data(params: Dict[str, str], just_ids: bool)-> Response:
             if not re.fullmatch(DATE_REGEX, until_str):
                 raise ValueError
             end_date=datetime.strptime(until_str, "%Y-%m-%d")
-            end_date = end_date.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc)
+            end_date = end_date.replace(hour=23, minute=59, second=59, tzinfo=timezone.utc)
             query_data[OAIParams.UNTIL]=until_str
         except Exception:
             raise OAIBadArgument("until date format must be YYYY-MM-DD")
     else:
-        end_date=datetime.now(timezone.utc)
+        end_date=datetime.now(timezone.utc).replace(hour=23, minute=59, second=59)
 
     #sets   
     set_str=params.get(OAIParams.SET)
@@ -104,13 +105,14 @@ def list_data(params: Dict[str, str], just_ids: bool)-> Response:
             raise OAIBadArgument("Invalid set request")
     else:
         rq_set=None
-    #TODO check that combined parameters are valid (dates are okay, sets are active and not test) combined with token data
 
-    #from and until flipped
-
-    #start too early
-
-    #until too late
+    #dates are valid
+    if start_date>end_date:
+        raise OAIBadArgument("until date must be greater than or equal to from date")
+    if start_date < EARLIEST_DATE:
+        raise OAIBadArgument("start date too early")
+    if end_date> datetime.now(timezone.utc) + timedelta(days=1):
+        raise OAIBadArgument("until date too late")
 
     #TODO rest of function
 
