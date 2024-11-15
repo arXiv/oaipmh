@@ -6,8 +6,9 @@ from arxiv.taxonomy.definitions import GROUPS, ARCHIVES_ACTIVE, CATEGORIES_ACTIV
 from arxiv.taxonomy.category import Group, Archive, Category
 
 from oaipmh.data.oai_config import SUPPORTED_METADATA_FORMATS, EARLIEST_DATE
-from oaipmh.data.oai_errors import OAIBadArgument, OAIBadFormat
+from oaipmh.data.oai_errors import OAIBadArgument, OAIBadFormat, OAIBadResumptionToken
 from oaipmh.data.oai_properties import OAIParams, OAIVerbs
+from oaipmh.processors.resume import ResToken
 from oaipmh.serializers.output_formats import Response
 from oaipmh.requests.param_processing import process_identifier
 
@@ -37,7 +38,7 @@ def get_record(params: Dict[str, str]) -> Response:
 
 def list_data(params: Dict[str, str], just_ids: bool)-> Response:
     """runs both list queries. just_ids true for list identifiers, false for list records"""
-    query_data: Dict[OAIParams, str]={OAIParams.VERB:OAIVerbs.LIST_IDS}
+    query_data: Dict[OAIParams, str]={OAIParams.VERB:params[OAIParams.VERB]}
 
     #parameter processing
     given_params=set(params.keys())
@@ -45,55 +46,60 @@ def list_data(params: Dict[str, str], just_ids: bool)-> Response:
         if given_params != {OAIParams.RES_TOKEN, OAIParams.VERB}: #resumption token is exclusive
             raise OAIBadArgument(f"No other paramters allowed with {OAIParams.RES_TOKEN}")
         token=params[OAIParams.RES_TOKEN]
-        #TODO token processing and validation
+        token_params, start_val=ResToken.from_token(token) #set request parameters from token
+        query_data[OAIParams.RES_TOKEN]=token
+        if params[OAIParams.VERB] != token_params[OAIParams.VERB]:
+            raise OAIBadResumptionToken("token from different verb", query_data)
+        params=token_params
+        given_params=set(params.keys())
+     
+    #process request parameters
+    #correct parameters present
+    if OAIParams.META_PREFIX not in given_params:
+        raise OAIBadArgument(f"{OAIParams.META_PREFIX} required.")
+    allowed_params={OAIParams.VERB,OAIParams.META_PREFIX, OAIParams.FROM, OAIParams.UNTIL, OAIParams.SET }
+    if given_params-allowed_params: #no extra keys allowed
+        raise OAIBadArgument(f"Unallowed parameter. Allowed parameters: {', '.join(str(param) for param in allowed_params)}")
 
-    else: #using request parameters
-        #correct parameters present
-        if OAIParams.META_PREFIX not in given_params:
-            raise OAIBadArgument(f"{OAIParams.META_PREFIX} required.")
-        allowed_params={OAIParams.VERB,OAIParams.META_PREFIX, OAIParams.FROM, OAIParams.UNTIL, OAIParams.SET }
-        if given_params-allowed_params: #no extra keys allowed
-            raise OAIBadArgument(f"Unallowed parameter. Allowed parameters: {', '.join(str(param) for param in allowed_params)}")
+    #metadata
+    meta_type_str=params[OAIParams.META_PREFIX]
+    if meta_type_str not in SUPPORTED_METADATA_FORMATS:
+        raise OAIBadFormat(reason="Did not recognize requested format", query_params=query_data)
+    meta_type=SUPPORTED_METADATA_FORMATS[meta_type_str]
+    query_data[OAIParams.META_PREFIX]=meta_type_str
 
-        #metadata
-        meta_type_str=params[OAIParams.META_PREFIX]
-        if meta_type_str not in SUPPORTED_METADATA_FORMATS:
-            raise OAIBadFormat(reason="Did not recognize requested format", query_params=query_data)
-        meta_type=SUPPORTED_METADATA_FORMATS[meta_type_str]
-        query_data[OAIParams.META_PREFIX]=meta_type_str
+    #dates
+    from_str=params.get(OAIParams.FROM)
+    if from_str:
+        try:
+            if not re.fullmatch(DATE_REGEX, from_str):
+                raise ValueError
+            start_date=datetime.strptime(from_str, "%Y-%m-%d")
+            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc)
+            query_data[OAIParams.FROM]=from_str
+        except Exception:
+            raise OAIBadArgument("from date format must be YYYY-MM-DD")
+    else:
+        start_date=EARLIEST_DATE
 
-        #dates
-        from_str=params.get(OAIParams.FROM)
-        if from_str:
-            try:
-                if not re.fullmatch(DATE_REGEX, from_str):
-                    raise ValueError
-                start_date=datetime.strptime(from_str, "%Y-%m-%d")
-                start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc)
-                query_data[OAIParams.FROM]=from_str
-            except Exception:
-                raise OAIBadArgument("from date format must be YYYY-MM-DD")
-        else:
-            start_date=EARLIEST_DATE
+    until_str=params.get(OAIParams.UNTIL)
+    if until_str:
+        try:
+            if not re.fullmatch(DATE_REGEX, until_str):
+                raise ValueError
+            end_date=datetime.strptime(until_str, "%Y-%m-%d")
+            end_date = end_date.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc)
+            query_data[OAIParams.UNTIL]=until_str
+        except Exception:
+            raise OAIBadArgument("until date format must be YYYY-MM-DD")
+    else:
+        end_date=datetime.now(timezone.utc)
 
-        until_str=params.get(OAIParams.UNTIL)
-        if until_str:
-            try:
-                if not re.fullmatch(DATE_REGEX, until_str):
-                    raise ValueError
-                end_date=datetime.strptime(until_str, "%Y-%m-%d")
-                end_date = end_date.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc)
-                query_data[OAIParams.UNTIL]=until_str
-            except Exception:
-                raise OAIBadArgument("until date format must be YYYY-MM-DD")
-        else:
-            end_date=datetime.now(timezone.utc)
-
-        #sets   
-        set_str=params.get(OAIParams.SET)
-        if set_str:
-            rq_set= _parse_set(set_str)
-            query_data[OAIParams.SET]=set_str
+    #sets   
+    set_str=params.get(OAIParams.SET)
+    if set_str:
+        rq_set= _parse_set(set_str)
+        query_data[OAIParams.SET]=set_str
 
     #TODO check that combined parameters are valid (dates are okay, sets are active and not test) combined with token data
 
