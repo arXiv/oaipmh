@@ -1,3 +1,13 @@
 {% macro request_element( attributes={}) %}
     <request {% for key, value in attributes.items() %}{{ key }}="{{ value }}" {% endfor %}>{{ url_for("general.oai", _external=True) }}</request>
 {% endmacro %}
+
+{% macro header(metadata, categories) %}
+    <header>
+        <identifier>oai:arXiv.org:{{metadata.paper_id}}</identifier>
+        <datestamp>{{ metadata.updated.strftime('%Y-%m-%d') }}</datestamp>
+        {% for cat in categories %}
+            <setSpec>{{cat}}</setSpec>
+        {% endfor %}
+    </header>
+{% endmacro %}

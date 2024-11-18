@@ -7,7 +7,7 @@ from oaipmh.data import oai_config
 from oaipmh.data.oai_errors import OAIBadArgument
 from oaipmh.data.oai_properties import OAIParams, OAIVerbs
 from oaipmh.serializers.output_formats import Response
-from oaipmh.processors.create_set_list import produce_set_list
+from oaipmh.processors.create_set_list import display_set_structure
 from oaipmh.requests.param_processing import process_identifier
 
 def identify(params: Dict[str, str]) -> Response:
@@ -65,5 +65,5 @@ def list_sets(params: Dict[str, str]) -> Response:
     else:
         if given_params != {OAIParams.VERB}: 
             raise OAIBadArgument(f"No other parameters allowed")
-    return produce_set_list(query_data) 
+    return display_set_structure(query_data) 
 

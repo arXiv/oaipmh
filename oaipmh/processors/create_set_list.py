@@ -1,15 +1,15 @@
 from datetime import datetime, timezone
-from typing import Dict, Any, Union
+from typing import Dict, Any, Union, List
 
 from flask import render_template
 
 from arxiv.taxonomy.category import Group, Archive, Category
-from arxiv.taxonomy.definitions import ARCHIVES, GROUPS, CATEGORIES_ACTIVE
+from arxiv.taxonomy.definitions import ARCHIVES, GROUPS, CATEGORIES_ACTIVE, CATEGORIES
 
 from oaipmh.data.oai_properties import OAIParams
 from oaipmh.serializers.output_formats import Response
 
-def produce_set_list(query_data: Dict[OAIParams, Any]) -> Response:
+def display_set_structure(query_data: Dict[OAIParams, Any]) -> Response:
     """create the set structure of a repository"""
     groups =  {key: grp for key,
                 grp in GROUPS.items()
@@ -27,6 +27,14 @@ def produce_set_list(query_data: Dict[OAIParams, Any]) -> Response:
                 to_set= make_set_str
     )
     return response, 200, {}
+
+def create_set_list(cats: str)->List[str]:
+    """turns the abs category string insto a list of set strings"""
+    result=[]
+    for cat in cats.split():
+        set=make_set_str(CATEGORIES[cat])
+        result.append(set)
+    return result
 
 def make_set_str(item: Union[Group, Archive, Category]) -> str:
     """helper function to convert arXiv category data into OAI set structure
