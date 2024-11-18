@@ -1,10 +1,12 @@
 #runs tests for the code list_records and list_indetifiers share
 import pytest
+from typing import Dict
 
 from arxiv.taxonomy.definitions import GROUPS, ARCHIVES, CATEGORIES
 
 from oaipmh.data.oai_properties import OAIParams, OAIVerbs
 from oaipmh.data.oai_errors import OAIBadArgument
+from oaipmh.processors.resume import ResToken
 from oaipmh.requests.data_queries import _parse_set
 
 def test_good_params(test_client):
@@ -13,36 +15,36 @@ def test_good_params(test_client):
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
-    assert "<error code='badArgument'>" not in text
+    assert "<error code=" not in text
 
     response = test_client.post("/oai", data=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
-    assert "<error code='badArgument'>" not in text
+    assert "<error code=" not in text
 
     #good maximal params
     params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.FROM: "2020-01-05", OAIParams.UNTIL:"2020-02-05", OAIParams.SET: "math"}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
-    assert "<error code='badArgument'>" not in text
+    assert "<error code=" not in text
 
     response = test_client.post("/oai", data=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
-    assert "<error code='badArgument'>" not in text
+    assert "<error code=" not in text
 
     #good partial params
     params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.UNTIL:"2020-02-05", OAIParams.SET: "math"}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
-    assert "<error code='badArgument'>" not in text
+    assert "<error code=" not in text
 
     response = test_client.post("/oai", data=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
-    assert "<error code='badArgument'>" not in text
+    assert "<error code=" not in text
 
 def test_extra_params(test_client):
     params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", "color":"green"}
@@ -126,7 +128,33 @@ def test_bad_date_params(test_client):
     assert "<error code='badArgument'>"  in text
     assert "until date format must be YYYY-MM-DD" in text
 
+    #start later than end
+    params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.UNTIL: "2024-02-08", OAIParams.FROM:"2024-03-05", OAIParams.SET: "math"}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code='badArgument'>"  in text
+    assert "until date must be greater than or equal to from date" in text
+
+    #start too early
+    params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.UNTIL: "2024-02-08", OAIParams.FROM:"2001-03-05", OAIParams.SET: "math"}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code='badArgument'>"  in text
+    assert "start date too early" in text
+
+    #dates in the future
+    params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.UNTIL: "2624-02-08", OAIParams.FROM:"2024-03-05", OAIParams.SET: "math"}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code='badArgument'>"  in text
+    assert "until date too late" in text
+    
+
 def test_bad_set_params(test_client):
+    #not a valid set combo
     params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.SET: "math:physics"}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
@@ -134,18 +162,34 @@ def test_bad_set_params(test_client):
     assert "<error code='badArgument'>"  in text
     assert "Set does not exist" in text
 
+    #test category
+    params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.SET: "test:test"}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code='badArgument'>"  in text
+    assert "Invalid set request" in text
+
+    #inactive category
+    params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.SET: "physics:adap-org"}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code='badArgument'>"  in text
+    assert "Set does not exist" in text
+
 def test_token_params(test_client):
-    #correct params
+    #invalid token
     params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.RES_TOKEN: "rainbow"}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
-    assert "<error code='badArgument'>" not in text
+    assert "<error code=" in text
 
     response = test_client.post("/oai", data=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
-    assert "<error code='badArgument'>" not in text
+    assert "<error code=" in text
 
     #cant have other valid params along with token
     params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.RES_TOKEN: "rainbow",  OAIParams.META_PREFIX: "oai_dc"}
@@ -160,6 +204,90 @@ def test_token_params(test_client):
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" in text
     assert "No other paramters allowed with" in text
+
+    #invalid token
+    query_data: Dict[OAIParams,str]={
+        OAIParams.VERB:OAIVerbs.LIST_RECORDS,
+        OAIParams.ID:'1234.5678', #not allowed
+        OAIParams.FROM:'10-11-2023',
+        OAIParams.UNTIL:'12-03-2023',
+        OAIParams.META_PREFIX:'oai_dc',
+    }
+    token=ResToken(query_data, 300)
+
+    params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.RES_TOKEN: token.token_str}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code=" in text
+
+    #valid token
+    query_data: Dict[OAIParams,str]={
+        OAIParams.VERB:OAIVerbs.LIST_RECORDS,
+        OAIParams.FROM:'2023-10-11',
+        OAIParams.SET:'cs',
+        OAIParams.META_PREFIX:'oai_dc',
+    }
+    token=ResToken(query_data, 300)
+
+    params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.RES_TOKEN: token.token_str}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code=" not in text
+
+    query_data: Dict[OAIParams,str]={
+        OAIParams.VERB:OAIVerbs.LIST_RECORDS,
+        OAIParams.FROM:'2023-10-11',
+        OAIParams.UNTIL:'2023-12-03',
+        OAIParams.META_PREFIX:'oai_dc',
+    }
+    token=ResToken(query_data, 300)
+
+    params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.RES_TOKEN: token.token_str}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code=" not in text
+
+    #include res token in token
+    query_data: Dict[OAIParams,str]={
+        OAIParams.VERB:OAIVerbs.LIST_RECORDS,
+        OAIParams.FROM:'2023-10-11',
+        OAIParams.UNTIL:'2023-12-03',
+        OAIParams.META_PREFIX:'oai_dc',
+        OAIParams.RES_TOKEN:token.token_str
+    }
+    token=ResToken(query_data, 300)
+
+    params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.RES_TOKEN: token.token_str}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code=" in text
+
+    #start val isnt int
+    token=ResToken(query_data, "cat")
+    params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.RES_TOKEN: token.token_str}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code=" in text
+
+    #res token doesnt have right type as new request
+    query_data: Dict[OAIParams,str]={
+        OAIParams.VERB:OAIVerbs.LIST_IDS,
+        OAIParams.FROM:'2023-10-11',
+        OAIParams.SET:'cs',
+        OAIParams.META_PREFIX:'oai_dc',
+    }
+    token=ResToken(query_data, 300)
+
+    params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.RES_TOKEN: token.token_str}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code='badResumptionToken'" in text
 
 def test_set_parser():
     #good values
