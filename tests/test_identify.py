@@ -25,3 +25,17 @@ def test_extra_params(test_client):
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" in text
     assert "No other parameters allowed" in text
+
+def test_contents(test_client):
+    params = {OAIParams.VERB: OAIVerbs.IDENTIFY}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<repositoryName>arXiv</repositoryName>" in text
+    assert "<baseURL>https://arxiv.org/oai</baseURL>" in text
+    assert "<earliestDatestamp>2007-05-23</earliestDatestamp>" in text
+    assert "<granularity>YYYY-MM-DD</granularity>" in text
+    assert "<description>" in text
+    assert "<text>Full-content harvesting not permitted (except by special arrangement)</text>" in text
+    assert "<URL>http://arxiv.org/help/oa/metadataPolicy</URL>" in text
+

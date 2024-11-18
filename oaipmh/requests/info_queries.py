@@ -3,7 +3,7 @@ from datetime import timezone, datetime
 
 from flask import render_template
 
-from oaipmh.data.oai_config import SUPPORTED_METADATA_FORMATS
+from oaipmh.data import oai_config
 from oaipmh.data.oai_errors import OAIBadArgument
 from oaipmh.data.oai_properties import OAIParams, OAIVerbs
 from oaipmh.serializers.output_formats import Response
@@ -15,9 +15,14 @@ def identify(params: Dict[str, str]) -> Response:
     query_data: Dict[OAIParams, str]={OAIParams.VERB : OAIVerbs.IDENTIFY}
     if set(params.keys()) != {OAIParams.VERB}:
         raise OAIBadArgument(f"No other parameters allowed for {OAIVerbs.IDENTIFY}")
-
-    #TODO 
-    return "<a>b</a>", 200, {}
+    
+    response=render_template("identify.xml",  #TODO look into links and url in logo description, make sure there is no conflict
+        response_date=datetime.now(timezone.utc),
+        query_params=query_data,
+        config_data=oai_config
+        )
+    headers={"Content-Type":"application/xml"}
+    return response, 200, headers
 
 def list_metadata_formats(params: Dict[str, str]) -> Response:
     """used to retrieve the metadata formats available from a repository.
@@ -44,7 +49,7 @@ def list_metadata_formats(params: Dict[str, str]) -> Response:
         response=render_template("metaformats.xml", 
             response_date=datetime.now(timezone.utc),
             query_params=query_data,
-            formats=SUPPORTED_METADATA_FORMATS
+            formats=oai_config.SUPPORTED_METADATA_FORMATS
             )
         headers={"Content-Type":"application/xml"}
         return response, 200, headers
