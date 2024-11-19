@@ -28,14 +28,6 @@ def display_set_structure(query_data: Dict[OAIParams, Any]) -> Response:
     )
     return response, 200, {}
 
-def create_set_list(cats: str)->List[str]:
-    """turns the abs category string insto a list of set strings"""
-    result=[]
-    for cat in cats.split():
-        set=make_set_str(CATEGORIES[cat])
-        result.append(set)
-    return result
-
 def make_set_str(item: Union[Group, Archive, Category]) -> str:
     """helper function to convert arXiv category data into OAI set structure
     the grp_ prefix should be removed from group ids

@@ -10,6 +10,7 @@ from oaipmh.serializers.output_formats import Response
 
 blueprint = Blueprint('general', __name__)
 
+#TODO host the schema
 
 @blueprint.route("/oai", methods=['GET', 'POST'])
 def oai() -> Response:
