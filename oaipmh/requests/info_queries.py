@@ -39,20 +39,18 @@ def list_metadata_formats(params: Dict[str, str]) -> Response:
         identifier_str=params[OAIParams.ID]
         arxiv_id=process_identifier(identifier_str)
         query_data[OAIParams.ID]=identifier_str
-
-        #TODO get formats for an item
-        return "<a>b</a>", 200, {}
-
+        #all formats are available for all items so we dont actually care about looking it up
     else: #give formats repository supports
         if given_params != {OAIParams.VERB}:
             raise OAIBadArgument(f"Only allowed parameters are {', '.join(str(param) for param in expected_params)}")
-        response=render_template("metaformats.xml", 
-            response_date=datetime.now(timezone.utc),
-            query_params=query_data,
-            formats=oai_config.SUPPORTED_METADATA_FORMATS
-            )
-        headers={"Content-Type":"application/xml"}
-        return response, 200, headers
+    
+    response=render_template("metaformats.xml", 
+        response_date=datetime.now(timezone.utc),
+        query_params=query_data,
+        formats=oai_config.SUPPORTED_METADATA_FORMATS
+        )
+    headers={"Content-Type":"application/xml"}
+    return response, 200, headers
 
 def list_sets(params: Dict[str, str]) -> Response:
     """used to retrieve the set structure of a repository"""

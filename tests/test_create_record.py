@@ -34,6 +34,16 @@ def test_create_arXivRawRecord(metadata_object1, metadata_object2):
     assert record.versions[1].source_flag==None
     assert record.versions[1].source_format=="pdf"
 
+def test_source_flags(metadata_object1):
+    dummy_record=arXivRawRecord([metadata_object1])
+    assert dummy_record._process_source_format('pdftex', "SR") == "SD"
+    assert dummy_record._process_source_format(None, None) is None
+    assert dummy_record._process_source_format('tex', '1') is None
+    assert dummy_record._process_source_format('text', 'd') is None
+    assert dummy_record._process_source_format('pdftex', None) == "D"
+    assert dummy_record._process_source_format('docx', "AS") == "ASX"
+    assert dummy_record._process_source_format('withdrawn', None) == "I"
+
 def test_create_arXivOldRecord(metadata_object2):
     record=arXivOldRecord(metadata_object2)
     assert record.categories==[CATEGORIES['cs.AI'], CATEGORIES['hep-lat']]
@@ -47,3 +57,29 @@ def test_create_dcRecord(metadata_object1, metadata_object2):
     assert record.header==Header("1234.56789", datetime(2023,3,1,15,7,8), [CATEGORIES['cs.AI'], CATEGORIES['hep-lat']])
     assert record.current_version_date==datetime(2023,2,1,10,3,6)
     assert record.initial_date==datetime(2023,1,1,10,3,6)
+
+def test_minimal_data(empty_metadata_object):
+    """ensures record objects encounter no errors if data is not present"""
+    #arXivOld for base record and header checks
+    record=arXivOldRecord(empty_metadata_object)
+    assert record.categories==[]
+    assert record.header.date==datetime(2010,2,1,10,3,6)
+    assert record.header.sets==[]
+
+    #arXiv
+    record=arXivRecord(empty_metadata_object)
+    assert record.authors==[]
+
+    #DC
+    record=dcRecord([empty_metadata_object])
+    assert record.authors==[]
+    assert record.current_version_date==datetime(2010,2,1,10,3,6)
+    assert record.deduplicate_cat_names()==[]
+
+    #arXivRaw
+    record= arXivRawRecord([empty_metadata_object])
+    entry=record.versions[0]
+    assert entry.source_format is None
+    assert entry.size_kilobytes==0
+    assert entry.source_flag is None
+    

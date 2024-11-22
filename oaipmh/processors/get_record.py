@@ -33,8 +33,6 @@ def do_get_record(arxiv_id: Identifier, format: MetadataFormat, query_data: Dict
         else: #arXiv
             record= arXivRecord(data)
 
-    #TODO format data
-    #TODO look into rights statements in the about section
     response=render_template("get_record.xml", 
         response_date=datetime.now(timezone.utc),
         query_params=query_data,

@@ -1,0 +1,189 @@
+{% import 'macros.xml' as macros %}
+{% macro create_record(record, format) %}
+        <record>
+            {{macros.header(record.header)}}
+            <metadata>
+                {% if format == "oai_dc" %}
+                    {{oai_dc_record(record)}}
+                {% elif format == "arXiv" %}
+                    {{arXiv_record(record)}}
+                {% elif format == "arXivRaw" %}
+                    {{arXivRaw_record(record)}}
+                {% else %}
+                    {{arXivOld_record(record)}}
+                {% endif %}
+            </metadata>
+        </record>
+{% endmacro%}
+
+{% macro oai_dc_record(record) %}
+    <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+        <dc:title>{{record.current_meta.title}}</dc:title>
+        {% for author in record.authors %}
+            <dc:creator>{{author[0]}}{% if author[2] %} {{ author[2] }}{% endif %}{% if author[1] %}, {{ author[1] }}{% endif %}</dc:creator>
+        {% endfor %}
+        {% for cat in record.deduplicate_cat_names() %}
+            <dc:subject>{{cat}}</dc:subject>
+        {% endfor %}
+        {% if record.current_meta.msc_class %}
+            <dc:subject>{{record.current_meta.msc_class}}</dc:subject>
+        {% endif %}
+        {% if record.current_meta.acm_class %}
+            <dc:subject>{{record.current_meta.acm_class}}</dc:subject>
+        {% endif %}
+        {% if record.current_meta.abstract %}
+            <dc:description>{{record.current_meta.abstract}} </dc:description>
+        {% endif %}
+        {% if record.current_meta.comments %}
+            <dc:description>{{record.current_meta.comments}}</dc:description>
+        {% endif %}
+        <dc:date>{{record.initial_date.strftime('%Y-%m-%d')}}</dc:date>
+        {% if record.initial_date != record.current_version_date %}
+            <dc:date>{{record.current_version_date.strftime('%Y-%m-%d')}}</dc:date>
+        {% endif %}
+        <dc:type>text</dc:type>
+        <dc:identifier>http://arxiv.org/abs/{{record.current_meta.paper_id}}</dc:identifier>
+        {% if record.current_meta.journal_ref %}
+            <dc:identifier>{{record.current_meta.journal_ref}}</dc:identifier>
+        {% endif %}
+        {% if record.current_meta.doi %}
+            <dc:identifier>doi:{{record.current_meta.doi}}</dc:identifier>
+        {% endif %}
+    </oai_dc:dc>
+{% endmacro%}
+
+{% macro arXiv_record(record) %}
+    <arXiv xmlns="http://arxiv.org/OAI/arXiv/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://arxiv.org/OAI/arXiv/ http://arxiv.org/OAI/arXiv.xsd">
+        <id>{{record.current_meta.paper_id}}</id>
+        <created>{{record.current_meta.created.strftime('%Y-%m-%d')}}</created>
+        {% if record.current_meta.updated %}
+            <updated>{{record.current_meta.updated.strftime('%Y-%m-%d')}}</updated>
+        {% endif %}
+        <authors>
+            {% for author in record.authors %}
+                <author>
+                    <keyname>{{author[0]}}</keyname>
+                    {% if author[1] %}
+                        <forenames>{{author[1]}}</forenames>
+                    {% endif %}
+                    {% if author[2] %}
+                        <suffix>{{author[2]}}</suffix>
+                    {% endif %}
+                </author>
+            {% endfor %}
+        </authors>
+        <title>{{record.current_meta.title}}</title>
+        {% if record.current_meta.abs_categories %}
+            <categories>{{record.current_meta.abs_categories}}</categories>
+        {% endif %}
+        {% if record.current_meta.comments %}
+            <comments>{{ record.current_meta.comments }}</comments>
+        {% endif %}
+        {% if record.current_meta.proxy %}
+            <proxy>{{ record.current_meta.proxy }}</proxy>
+        {% endif %}
+        {% if record.current_meta.report_num %}
+            <report-no>{{ record.current_meta.report_num }}</report-no>
+        {% endif %}
+        {% if record.current_meta.msc_class %}
+            <msc-class>{{ record.current_meta.msc_class }}</msc-class>
+        {% endif %}
+        {% if record.current_meta.acm_class %}
+            <acm-class>{{ record.current_meta.msc_class }}</acm-class>
+        {% endif %}
+        {% if record.current_meta.journal_ref %}
+            <journal-ref>{{ record.current_meta.journal_ref }}</journal-ref>
+        {% endif %}
+        {% if record.current_meta.doi %}
+            <doi>{{ record.current_meta.doi }}</doi>
+        {% endif %}
+        {% if record.current_meta.license %}
+            <license>{{ record.current_meta.license }}</license>
+        {% endif %}
+        {% if record.current_meta.abstract %}
+            <abstract>{{record.current_meta.abstract}}</abstract>
+        {% endif %}
+    </arXiv>
+{% endmacro%}
+
+{% macro arXivRaw_record(record) %}
+    <arXivRaw xmlns="http://arxiv.org/OAI/arXivRaw/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://arxiv.org/OAI/arXivRaw/ http://arxiv.org/OAI/arXivRaw.xsd">
+        <id>{{record.current_meta.paper_id}}</id>
+        <submitter>{{record.current_meta.submitter_name}}</submitter>
+        {% for version in record.versions %}
+            <version version="v{{version.version}}">
+                <date>{{version.submitted_date.strftime("%a, %d %b %Y %H:%M:%S GMT")}}</date>
+                <size>{{version.size_kilobytes}}kb</size>
+                {% if version.source_flag %}
+                    <source_type>{{version.source_flag}}</source_type>
+                {% endif %}
+            </version>
+        {% endfor %}
+        <title>{{record.current_meta.title}}</title>
+        <authors>{{record.current_meta.authors}}</authors>
+        <categories>{{record.current_meta.abs_categories}}</categories>
+        {% if record.current_meta.comments %}
+            <comments>{{ record.current_meta.comments }}</comments>
+        {% endif %}
+        {% if record.current_meta.proxy %}
+            <proxy>{{ record.current_meta.proxy }}</proxy>
+        {% endif %}
+        {% if record.current_meta.report_num %}
+            <report-no>{{ record.current_meta.report_num }}</report-no>
+        {% endif %}
+        {% if record.current_meta.msc_class %}
+            <msc-class>{{ record.current_meta.msc_class }}</msc-class>
+        {% endif %}
+        {% if record.current_meta.acm_class %}
+            <acm-class>{{ record.current_meta.msc_class }}</acm-class>
+        {% endif %}
+        {% if record.current_meta.journal_ref %}
+            <journal-ref>{{ record.current_meta.journal_ref }}</journal-ref>
+        {% endif %}
+        {% if record.current_meta.doi %}
+            <doi>{{ record.current_meta.doi }}</doi>
+        {% endif %}
+        {% if record.current_meta.license %}
+            <license>{{ record.current_meta.license }}</license>
+        {% endif %}
+        {% if record.current_meta.abstract %}
+            <abstract>{{record.current_meta.abstract}}</abstract>
+        {% endif %}
+    </arXivRaw>
+{% endmacro%}
+
+{% macro arXivOld_record(record) %}
+    <arXivOld xmlns="http://arxiv.org/OAI/arXivOld/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://arxiv.org/OAI/arXivOld/ http://arxiv.org/OAI/arXivOld.xsd">
+        <id>{{record.current_meta.paper_id}}</id>
+        <title>{{record.current_meta.title}}</title>
+        <authors>{{record.current_meta.authors}}</authors>
+        <categories>{{record.current_meta.abs_categories}}</categories>
+        {% if record.current_meta.comments %}
+            <comments>{{record.current_meta.comments}}</comments>
+        {% endif %}
+        {% if record.current_meta.proxy %}
+            <proxy>{{ record.current_meta.proxy }}</proxy>
+        {% endif %}
+        {% if record.current_meta.report_num %}
+            <report-no>{{ record.current_meta.report_num }}</report-no>
+        {% endif %}
+        {% if record.current_meta.msc_class %}
+            <msc-class>{{record.current_meta.msc_class}}</msc-class>
+        {% endif %}
+        {% if record.current_meta.acm_class %}
+            <acm-class>{{record.current_meta.acm_class}}</acm-class>
+        {% endif %}
+        {% if record.current_meta.journal_ref %}
+            <journal-ref>{{record.current_meta.journal_ref}}</journal-ref>
+        {% endif %}
+        {% if record.current_meta.doi %}
+            <doi>{{record.current_meta.doi}}</doi>
+        {% endif %}
+        {% if record.current_meta.license %}
+            <license>{{record.current_meta.license}}</license>
+        {% endif %}
+        {% if record.current_meta.abstract %}
+            <abstract>{{record.current_meta.abstract}}</abstract>
+        {% endif %}
+    </arXivOld>
+{% endmacro %}

@@ -105,3 +105,16 @@ def test_bad_verb(test_client):
     assert response.status_code == 200
     assert "<error code='badVerb'>" in response.text
     assert "Invalid verb provided" in response.text
+
+def test_duplicate_params(test_client):
+    response = test_client.get("/oai?verb=GetRecord&identifier=oai:arXiv.org:cs/0001027&metadataPrefix=oai_dc&metadataPrefix=oai_dc")
+    assert response.status_code == 200
+    assert "<error code='badArgument'>" in response.text
+    assert "Duplicate parameters not allowed" in response.text
+
+    response = test_client.get("/oai?verb=GetRecord&identifier=oai:arXiv.org:cs/0001027&metadataPrefix=oai_dc&verb=Identify")
+    assert response.status_code == 200
+    assert "<error code='badArgument'>" in response.text
+    assert "Duplicate parameters not allowed" in response.text
+
+    

@@ -6,24 +6,35 @@ def test_good_params(test_client):
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
-    assert "<error code='badArgument'>" not in text
+    assert "<error code=" not in text
+    assert '<metadataPrefix>arXiv</metadataPrefix>' in text
+    assert '<metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace>' in text
+    assert '<schema>http://arxiv.org/OAI/arXivRaw.xsd</schema>' in text
+    assert '<ListMetadataFormats>' in text
+    assert '<request verb="ListMetadataFormats">' in text
 
     response = test_client.post("/oai", data=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
-    assert "<error code='badArgument'>" not in text
+    assert "<error code=" not in text
 
     #for an item
-    params = {OAIParams.VERB: OAIVerbs.LIST_META_FORMATS, OAIParams.ID : "item"}
+    params = {OAIParams.VERB: OAIVerbs.LIST_META_FORMATS, OAIParams.ID : "oai:arXiv.org:1001.3172"}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
-    assert "<error code='badArgument'>" not in text
+    assert "<error code=" not in text
+    assert "<error code=" not in text
+    assert '<metadataPrefix>arXiv</metadataPrefix>' in text
+    assert '<metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace>' in text
+    assert '<schema>http://arxiv.org/OAI/arXivRaw.xsd</schema>' in text
+    assert '<ListMetadataFormats>' in text
+    assert '<request verb="ListMetadataFormats" identifier="oai:arXiv.org:1001.3172">' in text
 
     response = test_client.post("/oai", data=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
-    assert "<error code='badArgument'>" not in text
+    assert "<error code=" not in text
 
 def test_extra_params(test_client):
     #general case
