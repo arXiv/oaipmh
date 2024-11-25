@@ -1,5 +1,6 @@
 import os
-del os.environ["CLASSIC_DB_URI"]
+if "CLASSIC_DB_URI" in os.environ:
+    del os.environ["CLASSIC_DB_URI"]
 
 import pytest
 from datetime import datetime
