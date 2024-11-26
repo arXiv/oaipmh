@@ -25,6 +25,14 @@ class Header:
             self.date == other.date and
             self.sets == other.sets
         )
+    
+    def  __repr__(self) -> str:
+        return (f"Header({self.id[14:]}, {self.date.date()})")
+
+    def __lt__(self, other: object) -> bool:
+            if not isinstance(other, Header):
+                raise TypeError("Cannot compare Header with a non-Header object.")
+            return (self.date.date(), self.id) < (other.date.date(), other.id)
 
 class Record: #base record class
     def __init__(self, current_meta: Metadata):
@@ -36,12 +44,20 @@ class Record: #base record class
         date= current_meta.updated if current_meta.updated else current_meta.created
         self.header = Header(current_meta.paper_id, date, self.categories)
         self.current_meta = current_meta
+
+    def __lt__(self, other: object) -> bool:
+            if not isinstance(other, Record):
+                raise TypeError("Cannot compare Recors with a non-Record object.")
+            return (self.header) < (other.header)
         
 #specialized record classes for the different supported metadata types
 class arXivRecord(Record):
     def __init__(self, current_meta: Metadata):
         super().__init__(current_meta)
         self.authors= parse_author_affil(current_meta.authors)
+
+    def  __repr__(self) -> str:
+        return (f"arXivRecord({self.current_meta.paper_id}, {self.header.date.date()})")
 
 class arXivRawRecord(Record):
     def __init__(self, metadata: List[Metadata]):
@@ -59,6 +75,9 @@ class arXivRawRecord(Record):
             self.versions.append(entry)
             if version.is_current:
                 super().__init__(version)
+
+    def  __repr__(self) -> str:
+        return (f"arXivRawRecord({self.current_meta.paper_id}, {self.header.date.date()})")
 
     @staticmethod
     def _process_source_format(format: Optional[str], source_flags: Optional[str]) -> Optional[str]:
@@ -93,7 +112,8 @@ class dcRecord(Record):
             
             if version.version==1:
                 self.initial_date=version.created
-    
+    def  __repr__(self) -> str:
+        return (f"dcRecord({self.current_meta.paper_id}, {self.header.date.date()})")
     def deduplicate_cat_names(self)-> List[str]:
         result=[]
         for cat in self.categories:
@@ -105,3 +125,6 @@ class arXivOldRecord(Record):
     #no extra data
     def __init__(self, current_meta: Metadata):
         super().__init__(current_meta)
+    def  __repr__(self) -> str:
+        return (f"arXivOldRecord({self.current_meta.paper_id}, {self.header.date.date()})")
+    
