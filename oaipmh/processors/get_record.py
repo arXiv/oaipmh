@@ -13,7 +13,7 @@ from oaipmh.serializers.output_formats import Response
 
 def do_get_record(arxiv_id: Identifier, format: MetadataFormat, query_data: Dict[OAIParams, str])-> Response:
     """fetches the required data for a record for a specific format 
-    converts data into specif format and renders record template
+    converts data into specific format and renders record template
     """
     data=get_record_data(arxiv_id, format.all_versions)
     if not data:

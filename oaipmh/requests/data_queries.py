@@ -9,6 +9,7 @@ from oaipmh.data.oai_config import SUPPORTED_METADATA_FORMATS, EARLIEST_DATE
 from oaipmh.data.oai_errors import OAIBadArgument, OAIBadFormat, OAIBadResumptionToken
 from oaipmh.data.oai_properties import OAIParams, OAIVerbs
 from oaipmh.processors.get_record import do_get_record
+from oaipmh.processors.fetch_list import fetch_list
 from oaipmh.processors.resume import ResToken
 from oaipmh.serializers.output_formats import Response
 from oaipmh.requests.param_processing import process_identifier
@@ -39,6 +40,7 @@ def get_record(params: Dict[str, str]) -> Response:
 def list_data(params: Dict[str, str], just_ids: bool)-> Response:
     """runs both list queries. just_ids true for list identifiers, false for list records"""
     query_data: Dict[OAIParams, str]={OAIParams.VERB:params[OAIParams.VERB]}
+    skip_val=0
 
     #parameter processing
     given_params=set(params.keys())
@@ -113,9 +115,7 @@ def list_data(params: Dict[str, str], just_ids: bool)-> Response:
     if end_date> datetime.now(timezone.utc) + timedelta(days=1):
         raise OAIBadArgument("until date too late")
 
-    #TODO rest of function
-
-    return "<a>b</a>", 200, {}
+    return fetch_list(just_ids, start_date, end_date, meta_type, rq_set, skip_val , query_data)
 
 def _parse_set(set_str:str)-> Union[Group, Archive, Category]:
     """turns OAI style string into taxonomy item
