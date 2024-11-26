@@ -12,8 +12,10 @@ class ResToken:
         self.token_str = self.to_token()
 
     def to_token(self) -> str:
+        params = self.params.copy()
+        params.pop("resumptionToken", None)
         data = {
-            "params": self.params,
+            "params": params,
             "start_val": self.start_val
         }
         json_str = json.dumps(data)

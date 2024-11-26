@@ -31,10 +31,9 @@ def get_list_data(just_ids:bool, start_date :datetime, end_date:datetime, all_ve
     start_timestamp=start_date.timestamp()
     end_timestamp=end_date.timestamp()
 
-    limit=10 #TODO remove
     #all papers that have been updated within the time frame
     doc_ids=( 
-        Session.query(Metadata.document_id) #TODO may want to fetch more because im going to need it anyways
+        Session.query(Metadata.document_id)
         .filter(
             Metadata.modtime >= start_timestamp,  
             Metadata.modtime <= end_timestamp,  
@@ -55,7 +54,7 @@ def get_list_data(just_ids:bool, start_date :datetime, end_date:datetime, all_ve
         .filter(Metadata.is_current == 1)
         .order_by(Metadata.modtime, Metadata.paper_id)
         .offset(skip)
-        .limit(limit+1) #to see if we need a resumtion token
+        .limit(limit+1) #one extra to see if resumption token needed
         .subquery()
     )
 

@@ -48,7 +48,7 @@ def list_data(params: Dict[str, str], just_ids: bool)-> Response:
         if given_params != {OAIParams.RES_TOKEN, OAIParams.VERB}: #resumption token is exclusive
             raise OAIBadArgument(f"No other paramters allowed with {OAIParams.RES_TOKEN}")
         token=params[OAIParams.RES_TOKEN]
-        token_params, start_val=ResToken.from_token(token) 
+        token_params, skip_val=ResToken.from_token(token) 
         query_data[OAIParams.RES_TOKEN]=token
         if params[OAIParams.VERB] != token_params[OAIParams.VERB]:
             raise OAIBadResumptionToken("token from different verb", query_data)
