@@ -1,5 +1,5 @@
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 from arxiv.authors import parse_author_affil
 from arxiv.db.models import Metadata
@@ -40,14 +40,16 @@ class Record: #base record class
         if current_meta.abs_categories:
             for cat in current_meta.abs_categories.split():
                 self.categories.append(CATEGORIES[cat])
-
-        date= current_meta.updated if current_meta.updated else current_meta.created
+        if current_meta.updated:
+            date= current_meta.updated 
+        else:
+            date=datetime.fromtimestamp(current_meta.modtime, tz=timezone.utc)
         self.header = Header(current_meta.paper_id, date, self.categories)
         self.current_meta = current_meta
 
     def __lt__(self, other: object) -> bool:
             if not isinstance(other, Record):
-                raise TypeError("Cannot compare Recors with a non-Record object.")
+                raise TypeError("Cannot compare Records with a non-Record object.")
             return (self.header) < (other.header)
         
 #specialized record classes for the different supported metadata types

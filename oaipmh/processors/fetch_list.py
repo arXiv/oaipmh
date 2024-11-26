@@ -31,12 +31,23 @@ def fetch_list(just_ids:bool, start_date :datetime, end_date:datetime, meta_type
     
     objects=create_records(data, just_ids, meta_type)
 
-    if len(objects)>limit: #handle resumption token
-        objects.pop() #remove extra item
-        token=ResToken(query_data, skip+limit) #TODO could do something clever with changing the date to not have to process as much data in future
+    #resumption token handling
+    if len(objects)>limit: 
+        last_date=objects[-1].date.date()
+        if last_date== objects[0].date.date(): #all the same day
+            objects.pop() #remove the extra item
+            res_token=ResToken(query_data, skip+limit) 
+        else: #resume from final day
+            to_skip=0
+            for i in range(len(objects) - 1, -1, -1):  # iterate backward through list
+                to_skip+=1
+                if objects[i].date.date() != last_date:
+                    new_query=query_data
+                    new_query[OAIParams.FROM]=last_date.strftime('%Y-%m-%d')
+                    res_token=ResToken(new_query, to_skip)
+                    break
     else:
         res_token=None
-
 
     response='' #TODO rendering
     headers={"Content-Type":"application/xml"}
