@@ -75,7 +75,8 @@ class arXivRawRecord(Record):
             self.versions.append(entry)
             if version.is_current:
                 super().__init__(version)
-
+        self.versions.sort(key=lambda x: x.version)
+        
     def  __repr__(self) -> str:
         return (f"arXivRawRecord({self.current_meta.paper_id}, {self.header.date.date()})")
 
