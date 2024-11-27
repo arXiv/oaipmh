@@ -10,8 +10,9 @@ class ResToken:
         self.params = params
         self.start_val = start_val
         self.token_str = self.to_token()
+        #TODO expire on next announce
 
-    def to_token(self) -> str:
+    def to_token(self) -> str: #TODO encode special characters
         params = self.params.copy()
         params.pop("resumptionToken", None)
         data = {

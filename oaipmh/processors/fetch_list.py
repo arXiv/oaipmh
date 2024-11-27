@@ -5,6 +5,7 @@ from flask import render_template
 
 from arxiv.db.models import Metadata
 from arxiv.taxonomy.category import Group, Archive, Category
+from arxiv.taxonomy.definitions import CATEGORIES
 
 from oaipmh.processors.db import get_list_data
 
@@ -32,24 +33,48 @@ def fetch_list(just_ids:bool, start_date :datetime, end_date:datetime, meta_type
     objects=create_records(data, just_ids, meta_type)
 
     #resumption token handling
+    res_token=None
     if len(objects)>limit: 
-        last_date=objects[-1].date.date()
-        if last_date== objects[0].date.date(): #all the same day
+        if just_ids:
+            last_date=objects[-1].date.date()
+            first_date=objects[0].date.date()
+        else:
+            last_date=objects[-1].header.date.date()
+            first_date=objects[0].header.date.date()
+
+        if last_date== first_date: #all the same day
             objects.pop() #remove the extra item
-            res_token=ResToken(query_data, skip+limit) 
+            res_token=ResToken(query_data, skip+limit).token_str
+
         else: #resume from final day
             to_skip=0
             for i in range(len(objects) - 1, -1, -1):  # iterate backward through list
                 to_skip+=1
-                if objects[i].date.date() != last_date:
+                if just_ids:
+                    compare_date=objects[i].date.date()
+                else:
+                    compare_date=objects[i].header.date.date()
+                if compare_date != last_date:
                     new_query=query_data
                     new_query[OAIParams.FROM]=last_date.strftime('%Y-%m-%d')
-                    res_token=ResToken(new_query, to_skip)
+                    res_token=ResToken(new_query, to_skip).token_str
                     break
-    else:
-        res_token=None
 
-    response='' #TODO rendering
+    if just_ids:
+        response=render_template("list_identifiers.xml", 
+            response_date=datetime.now(timezone.utc),
+            query_params=query_data,
+            headers=objects,
+            token=res_token
+            )
+    else:
+        response=render_template("list_records.xml", 
+            response_date=datetime.now(timezone.utc),
+            query_params=query_data,
+            records=objects,
+            format=meta_type.prefix,
+            token=res_token
+            )
     headers={"Content-Type":"application/xml"}
     return response, 200, headers
 
@@ -58,7 +83,11 @@ def create_records(data: List[Metadata], just_ids:bool, format:MetadataFormat)->
     items=[]
     if just_ids:
         for item in data:
-            header=Header(item.paper_id, datetime.fromtimestamp(item.modtime, tz=timezone.utc), item.abs_categories)
+            categories: List[Category]=[]
+            if item.abs_categories:
+                for cat in item.abs_categories.split():
+                    categories.append(CATEGORIES[cat])
+            header=Header(item.paper_id, datetime.fromtimestamp(item.modtime, tz=timezone.utc), categories)
             items.append(header)
     else: 
         if format.prefix=="arXiv":

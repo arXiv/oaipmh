@@ -1,0 +1,17 @@
+{% extends "base.xml" %}
+{% import 'macros.xml' as macros %}
+
+{% block request_element %}
+        {{ macros.request_element(query_params) }}
+{% endblock %}
+
+{% block interior_xml %}
+    <ListIdentifiers>
+        {% for header in headers %}
+            {{macros.header(header)}}
+        {% endfor %}
+        {% if token %}
+            <resumptionToken>{{token}}</resumptionToken>
+        {% endif %}
+    </ListIdentifiers>
+{% endblock %}
