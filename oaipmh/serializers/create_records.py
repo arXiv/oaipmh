@@ -51,7 +51,7 @@ class arXivRawRecord(Record):
                 version=version.version,
                 raw='',
                 submitted_date=version.created,
-                size_kilobytes = version.source_size // 1000 if version.source_size else 0,
+                size_kilobytes = version.source_size // 1024 if version.source_size else 0,
                 source_flag=self._process_source_format(version.source_format, version.source_flags),
                 is_current=version.is_current,
                 source_format=version.source_format 
