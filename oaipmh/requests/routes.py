@@ -1,5 +1,5 @@
 from typing import Dict
-from flask import Blueprint, request, render_template
+from flask import Blueprint, request, send_file
 
 from oaipmh.requests.info_queries import identify, list_metadata_formats, list_sets
 from oaipmh.requests.data_queries import get_record, list_data
@@ -42,24 +42,19 @@ def oai() -> Response:
 
 @blueprint.route("/OAI/arXivRaw.xsd", methods=['GET', 'POST'])
 def schema_arXivRaw() -> Response:
-    response=render_template("schema/arXivRaw.xsd")
-    headers={}
-    headers["Content-Type"]="application/xml"
-    return response, 200, headers
+    file_path = "templates/schema/arXivRaw.xsd" 
+    return send_file(file_path, mimetype="application/xml")
+
 
 @blueprint.route("/OAI/arXiv.xsd", methods=['GET', 'POST'])
 def schema_arXiv() -> Response:
-    response=render_template("schema/arXiv.xsd")
-    headers={}
-    headers["Content-Type"]="application/xml"
-    return response, 200, headers
+    file_path = "templates/schema/arXiv.xsd" 
+    return send_file(file_path, mimetype="application/xml")
 
 @blueprint.route("/OAI/arXivOld.xsd", methods=['GET', 'POST'])
 def schema_arXivOld() -> Response:
-    response=render_template("schema/arXivOld.xsd")
-    headers={}
-    headers["Content-Type"]="application/xml"
-    return response, 200, headers
+    file_path = "templates/schema/arXivOld.xsd" 
+    return send_file(file_path, mimetype="application/xml")
 
 @blueprint.route('/favicon.ico')
 def favicon():
