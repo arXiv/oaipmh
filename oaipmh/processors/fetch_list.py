@@ -23,10 +23,8 @@ def fetch_list(just_ids:bool, start_date :datetime, end_date:datetime, meta_type
  
     all_versions = False if just_ids else meta_type.all_versions
     limit = IDENTIFIERS_LIMIT if just_ids else RECORDS_LIMIT
-    limit=5 #TODO remove
-    #TODO category processing
 
-    data=get_list_data(just_ids, start_date, end_date, all_versions, None, skip, limit)
+    data=get_list_data(just_ids, start_date, end_date, all_versions, rq_set, skip, limit)
     if not data:
         raise OAINoRecordsMatch(query_params=query_data)
     
