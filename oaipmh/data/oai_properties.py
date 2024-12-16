@@ -17,8 +17,9 @@ class OAIVerbs:
     LIST_SETS = "ListSets"
 
 class MetadataFormat:
-    def __init__(self, prefix: str, schema: str, namespace: str):
+    def __init__(self, prefix: str, schema: str, namespace: str, all_versions:bool):
         self.prefix = prefix
         self.schema = schema
         self.namespace = namespace
+        self.all_versions= all_versions
 

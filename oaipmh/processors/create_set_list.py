@@ -1,15 +1,15 @@
 from datetime import datetime, timezone
-from typing import Dict, Any, Union
+from typing import Dict, Any, Union, List
 
 from flask import render_template
 
 from arxiv.taxonomy.category import Group, Archive, Category
-from arxiv.taxonomy.definitions import ARCHIVES, GROUPS, CATEGORIES_ACTIVE
+from arxiv.taxonomy.definitions import ARCHIVES, GROUPS, CATEGORIES_ACTIVE, CATEGORIES
 
 from oaipmh.data.oai_properties import OAIParams
 from oaipmh.serializers.output_formats import Response
 
-def produce_set_list(query_data: Dict[OAIParams, Any]) -> Response:
+def display_set_structure(query_data: Dict[OAIParams, Any]) -> Response:
     """create the set structure of a repository"""
     groups =  {key: grp for key,
                 grp in GROUPS.items()

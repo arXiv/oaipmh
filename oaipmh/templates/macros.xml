@@ -1,3 +1,13 @@
 {% macro request_element( attributes={}) %}
-    <request {% for key, value in attributes.items() %}{{ key }}="{{ value }}" {% endfor %}>{{ url_for("general.oai", _external=True) }}</request>
+    <request{% for key, value in attributes.items() %} {{ key }}="{{ value }}"{% endfor %}>{{ url_for("general.oai", _external=True) }}</request>
+{% endmacro %}
+
+{% macro header(header) %}
+    <header>
+        <identifier>{{header.id}}</identifier>
+        <datestamp>{{ header.date.strftime('%Y-%m-%d') }}</datestamp>
+        {% for set in header.sets %}
+            <setSpec>{{set}}</setSpec>
+        {% endfor %}
+    </header>
 {% endmacro %}

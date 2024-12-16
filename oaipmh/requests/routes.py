@@ -4,7 +4,7 @@ from flask import Blueprint, request, send_file
 from oaipmh.requests.info_queries import identify, list_metadata_formats, list_sets
 from oaipmh.requests.data_queries import get_record, list_data
 from oaipmh.serializers.output_formats import Response
-from oaipmh.data.oai_errors import OAIBadVerb
+from oaipmh.data.oai_errors import OAIBadVerb, OAIBadArgument
 from oaipmh.data.oai_properties import OAIVerbs
 from oaipmh.serializers.output_formats import Response
 
@@ -17,8 +17,12 @@ def oai() -> Response:
     this defines what the client is asking for as per the OAI standard
     further verification of parameters is done with the handlers for individual verbs
     """
-    #TODO duplicate params dont create errors, technically not to spec
-    params: Dict[str, str] = request.args.to_dict() if request.method == 'GET' else request.form.to_dict()
+    param_source=request.args if request.method == 'GET' else request.form
+    for _, values in param_source.lists():
+        if len(values) > 1:
+            raise OAIBadArgument("Duplicate parameters not allowed")
+    params: Dict[str, str] = param_source.to_dict()
+
     verb = params.get("verb", "")
     match verb:
         case OAIVerbs.GET_RECORD:

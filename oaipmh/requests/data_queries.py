@@ -8,6 +8,7 @@ from arxiv.taxonomy.category import Group, Archive, Category
 from oaipmh.data.oai_config import SUPPORTED_METADATA_FORMATS, EARLIEST_DATE
 from oaipmh.data.oai_errors import OAIBadArgument, OAIBadFormat, OAIBadResumptionToken
 from oaipmh.data.oai_properties import OAIParams, OAIVerbs
+from oaipmh.processors.get_record import do_get_record
 from oaipmh.processors.resume import ResToken
 from oaipmh.serializers.output_formats import Response
 from oaipmh.requests.param_processing import process_identifier
@@ -32,10 +33,8 @@ def get_record(params: Dict[str, str]) -> Response:
         raise OAIBadFormat(reason="Did not recognize requested format", query_params=query_data)
     meta_type=SUPPORTED_METADATA_FORMATS[meta_type_str]
     query_data[OAIParams.META_PREFIX]=meta_type_str
+    return do_get_record(arxiv_id, meta_type, query_data)
 
-    #TODO paramters done, do rest of function
-
-    return "<a>b</a>", 200, {}
 
 def list_data(params: Dict[str, str], just_ids: bool)-> Response:
     """runs both list queries. just_ids true for list identifiers, false for list records"""

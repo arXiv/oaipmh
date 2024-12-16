@@ -1,0 +1,12 @@
+{% extends "base.xml" %}
+{% import 'record_formats.xml' as formats %}
+
+{% block request_element %}
+        {{ macros.request_element(query_params) }}
+{% endblock %}
+
+{% block interior_xml %}
+    <GetRecord>
+        {{formats.create_record(record, format)}}
+    </GetRecord>
+{% endblock %}
