@@ -1,5 +1,5 @@
 from typing import Dict
-from flask import Blueprint, request
+from flask import Blueprint, request, send_file
 
 from oaipmh.requests.info_queries import identify, list_metadata_formats, list_sets
 from oaipmh.requests.data_queries import get_record, list_data
@@ -9,7 +9,6 @@ from oaipmh.data.oai_properties import OAIVerbs
 from oaipmh.serializers.output_formats import Response
 
 blueprint = Blueprint('general', __name__)
-
 
 @blueprint.route("/oai", methods=['GET', 'POST'])
 def oai() -> Response:
@@ -40,6 +39,22 @@ def oai() -> Response:
     headers["Content-Type"]="application/xml"
 
     return response, code, headers
+
+@blueprint.route("/OAI/arXivRaw.xsd", methods=['GET', 'POST'])
+def schema_arXivRaw() -> Response:
+    file_path = "templates/schema/arXivRaw.xsd" 
+    return send_file(file_path, mimetype="application/xml")
+
+
+@blueprint.route("/OAI/arXiv.xsd", methods=['GET', 'POST'])
+def schema_arXiv() -> Response:
+    file_path = "templates/schema/arXiv.xsd" 
+    return send_file(file_path, mimetype="application/xml")
+
+@blueprint.route("/OAI/arXivOld.xsd", methods=['GET', 'POST'])
+def schema_arXivOld() -> Response:
+    file_path = "templates/schema/arXivOld.xsd" 
+    return send_file(file_path, mimetype="application/xml")
 
 @blueprint.route('/favicon.ico')
 def favicon():
