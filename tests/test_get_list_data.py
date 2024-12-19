@@ -1,7 +1,96 @@
+from datetime import datetime
 
 from arxiv.taxonomy.definitions import GROUPS, ARCHIVES, CATEGORIES
 
+from oaipmh.data.oai_config import SUPPORTED_METADATA_FORMATS
 from oaipmh.processors.db import process_requested_subject, get_list_data
+from oaipmh.processors.fetch_list import create_records
+from oaipmh.serializers.create_records import Header, arXivOldRecord
+
+#data fetching
+def test_no_data():
+    result=get_list_data(
+        just_ids=True,
+        start_date=datetime(2018,1,1,0,0,0),
+        end_date=datetime(2018,1,2,0,0,0),
+        all_versions=False,
+        rq_set=None,
+        skip=0,
+        limit=5
+        )
+    assert result==[]
+
+def test_data_fetch():
+    data=get_list_data(
+        just_ids=True,
+        start_date=datetime(2008,1,1,0,0,0),
+        end_date=datetime(2018,1,1,0,0,0),
+        all_versions=False,
+        rq_set=None,
+        skip=0,
+        limit=5
+        )
+    objects=create_records(data, True, SUPPORTED_METADATA_FORMATS["arXiv"])
+    assert all(isinstance(item, Header) for item in objects)
+    assert len(objects) ==6 #one greater than limit
+    assert any(obj.id == "oai:arXiv.org:hep-th/9901002" for obj in objects)
+    assert any(obj.id == "oai:arXiv.org:1102.0285" for obj in objects)
+
+def test_data_fetch_selective_time():
+    data=get_list_data(
+        just_ids=False,
+        start_date=datetime(2009,1,1,0,0,0),
+        end_date=datetime(2009,12,1,0,0,0),
+        all_versions=False,
+        rq_set=None,
+        skip=0,
+        limit=5
+        )
+    objects=create_records(data, False, SUPPORTED_METADATA_FORMATS["arXivOld"])
+    assert all(isinstance(item, arXivOldRecord) for item in objects)
+    assert len(objects) <=6 
+    assert any(obj.header.id == "oai:arXiv.org:hep-th/9901002" for obj in objects)
+    assert not any(obj.header.id == "oai:arXiv.org:1102.0285" for obj in objects)
+    assert not any(obj.header.id == "oai:arXiv.org:chao-dyn/9510015" for obj in objects)
+
+def test_data_fetch_selective_set():
+    data=get_list_data(
+        just_ids=False,
+        start_date=datetime(2007,1,1,0,0,0),
+        end_date=datetime(2019,12,1,0,0,0),
+        all_versions=False,
+        rq_set=GROUPS['grp_math'],
+        skip=0,
+        limit=5
+        )
+    objects=create_records(data, False, SUPPORTED_METADATA_FORMATS["arXivOld"])
+    assert all(isinstance(item, arXivOldRecord) for item in objects)
+    assert len(objects) <=6 
+    assert any(obj.header.id == "oai:arXiv.org:0704.0046" for obj in objects)
+    assert not any(obj.header.id == "oai:arXiv.org:hep-th/9901002" for obj in objects)
+    assert  any(obj.header.id == "oai:arXiv.org:0712.3217" for obj in objects)
+
+def test_data_fetch_selective_set_alias():
+    data=get_list_data(
+        just_ids=False,
+        start_date=datetime(2007,1,1,0,0,0),
+        end_date=datetime(2019,12,1,0,0,0),
+        all_versions=False,
+        rq_set=ARCHIVES["eess"],
+        skip=0,
+        limit=5
+        )
+    objects=create_records(data, False, SUPPORTED_METADATA_FORMATS["arXivOld"])
+    assert all(isinstance(item, arXivOldRecord) for item in objects)
+    assert len(objects) <=6 
+    assert any(obj.header.id == "oai:arXiv.org:1008.3222" for obj in objects) #this paper only has cs.SY in its category string
+    #assert any(obj.header.id == "oai:arXiv.org:1008.3222" and "eess:eess:SY" in obj.header.sets for obj in objects) #TODO this should pass
+    assert not any(obj.header.id == "oai:arXiv.org:0704.0046" for obj in objects)
+
+#TODO selective amounts of data being returned
+#TODO tests for create records
+
+#category processing
 
 def test_group_subject_processing():
     result_archs, result_cats=process_requested_subject(GROUPS['grp_physics'])
