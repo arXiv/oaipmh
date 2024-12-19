@@ -113,7 +113,7 @@ def empty_metadata_object():
         abstract=None,
         license=None,
         version=1,
-        modtime=None,
+        modtime=1276732841,
         is_current=1,
         is_withdrawn=0
     )

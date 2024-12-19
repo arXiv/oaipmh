@@ -23,7 +23,7 @@ def test_good_params(test_client):
     assert "<error code=" not in text
 
     #good maximal params
-    params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.FROM: "2020-01-05", OAIParams.UNTIL:"2020-02-05", OAIParams.SET: "math"}
+    params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.FROM: "2009-01-05", OAIParams.UNTIL:"2020-02-05", OAIParams.SET: "math"}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
@@ -224,11 +224,11 @@ def test_token_params(test_client):
     #valid token
     query_data: Dict[OAIParams,str]={
         OAIParams.VERB:OAIVerbs.LIST_RECORDS,
-        OAIParams.FROM:'2023-10-11',
-        OAIParams.SET:'cs',
+        OAIParams.FROM:'2010-09-11',
+        OAIParams.SET:'math',
         OAIParams.META_PREFIX:'oai_dc',
     }
-    token=ResToken(query_data, 300)
+    token=ResToken(query_data, 1)
 
     params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.RES_TOKEN: token.token_str}
     response = test_client.get("/oai", query_string=params)
@@ -238,11 +238,11 @@ def test_token_params(test_client):
 
     query_data: Dict[OAIParams,str]={
         OAIParams.VERB:OAIVerbs.LIST_RECORDS,
-        OAIParams.FROM:'2023-10-11',
+        OAIParams.FROM:'2008-10-11',
         OAIParams.UNTIL:'2023-12-03',
         OAIParams.META_PREFIX:'oai_dc',
     }
-    token=ResToken(query_data, 300)
+    token=ResToken(query_data, 1)
 
     params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.RES_TOKEN: token.token_str}
     response = test_client.get("/oai", query_string=params)
