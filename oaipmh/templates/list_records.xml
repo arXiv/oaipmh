@@ -1,5 +1,6 @@
 {% extends "base.xml" %}
 {% import 'record_formats.xml' as formats %}
+{% import 'token.xml' as token_macro %}
 
 {% block request_element %}
         {{ macros.request_element(query_params) }}
@@ -11,7 +12,7 @@
             {{formats.create_record(record, format)}}
         {% endfor %}
         {% if token %}
-            <resumptionToken>{{token}}</resumptionToken>
+            {{token_macro.token(token)}}
         {% endif %}
     </ListRecords>
 {% endblock %}

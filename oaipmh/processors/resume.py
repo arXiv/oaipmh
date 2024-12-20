@@ -1,4 +1,5 @@
 from typing import Dict, Tuple
+from datetime import datetime, timezone, timedelta
 from urllib.parse import urlencode, quote, unquote, parse_qs
 
 from oaipmh.data.oai_errors import OAIBadResumptionToken
@@ -9,7 +10,7 @@ class ResToken:
         self.params = params
         self.start_val = start_val
         self.token_str = self.to_token()
-        #TODO expire on next announce
+        self.expires = (datetime.now(timezone.utc) + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
 
     def to_token(self) -> str: 
         params = self.params.copy()

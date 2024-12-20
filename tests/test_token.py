@@ -17,6 +17,8 @@ def test_token_encoding_decoding():
     res_token = ResToken(params=params, start_val=0)
     assert res_token.params== params
     assert res_token.start_val == 0
+    assert res_token.expires.hour==0
+    assert res_token.expires.minute==0
     encoded_token = res_token.to_token()
     assert isinstance(encoded_token, str)
     assert not any(char in encoded_token for char in unallowed_chars)

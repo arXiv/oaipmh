@@ -1,5 +1,6 @@
 {% extends "base.xml" %}
 {% import 'macros.xml' as macros %}
+{% import 'token.xml' as token_macro %}
 
 {% block request_element %}
         {{ macros.request_element(query_params) }}
@@ -11,7 +12,7 @@
             {{macros.header(header)}}
         {% endfor %}
         {% if token %}
-            <resumptionToken>{{token}}</resumptionToken>
+            {{token_macro.token(token)}}
         {% endif %}
     </ListIdentifiers>
 {% endblock %}

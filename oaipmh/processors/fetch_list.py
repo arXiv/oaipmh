@@ -42,7 +42,7 @@ def fetch_list(just_ids:bool, start_date :datetime, end_date:datetime, meta_type
 
         if last_date== first_date: #all the same day
             objects.pop() #remove the extra item
-            res_token=ResToken(query_data, skip+limit).token_str
+            res_token=ResToken(query_data, skip+limit)
 
         else: #resume from final day
             to_skip=0
@@ -55,7 +55,7 @@ def fetch_list(just_ids:bool, start_date :datetime, end_date:datetime, meta_type
                 if compare_date != last_date:
                     new_query=query_data
                     new_query[OAIParams.FROM]=last_date.strftime('%Y-%m-%d')
-                    res_token=ResToken(new_query, to_skip).token_str
+                    res_token=ResToken(new_query, to_skip)
                     break
 
     if just_ids:
