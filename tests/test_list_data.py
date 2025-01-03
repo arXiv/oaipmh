@@ -329,3 +329,83 @@ def test_set_parser():
     with pytest.raises(OAIBadArgument, match="Set does not exist"):
         _parse_set("math:nucl-th")
 
+#formatting
+
+
+def test_records_from_params(test_client):
+    params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.META_PREFIX: "arXiv", OAIParams.FROM: "2009-01-05", OAIParams.UNTIL:"2020-02-05", OAIParams.SET: "math"}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code=" not in text
+    assert '<ListRecords>' in text
+    assert '<request verb="ListRecords" metadataPrefix="arXiv" from="2009-01-05" until="2020-02-05" set="math">' in text
+    assert '<identifier>oai:arXiv.org:0704.0046</identifier>' in text
+    assert  text.count("<record>")==4 #could change if more data gets added to test database
+    assert '<id>0806.4129</id>' in text
+    assert '<doi>10.1007/s00205-010-0322-x</doi>' in text
+
+def test_records_starting_from_token(test_client):
+    query_data: Dict[OAIParams,str]={
+        OAIParams.VERB:OAIVerbs.LIST_RECORDS,
+        OAIParams.FROM:'2019-10-11',
+        OAIParams.UNTIL:'2024-12-03',
+        OAIParams.META_PREFIX:'oai_dc'
+    }
+    token=ResToken(query_data, 2)
+
+    params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.RES_TOKEN: token.token_str}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code=" not in text
+    assert "<request verb='ListRecords' resumptionToken='" in text
+    assert 'verb%3DListRecords%26from%3D2019-10-11%26until%3D2024-12-03%26metadataPrefix%3Doai_dc%26skip%3D2' in text
+    assert '<ListRecords>' in text
+    assert  text.count("<record>")==5 #could change if more data gets added to test database
+    assert '<identifier>oai:arXiv.org:1102.0372</identifier>' in text
+    assert '<dc:title>Lattice polygons and families of curves on rational surfaces</dc:title>' in text
+    assert '<dc:identifier>http://arxiv.org/abs/2305.11452</dc:identifier>' in text
+
+    assert '<identifier>oai:arXiv.org:1102.0366</identifier>' not in text #first entry should be skipped
+    assert 'oai:arXiv.org:1005.1251' not in text #second entry should be skipped
+
+def test_headers_from_params(test_client):
+    params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "arXiv", OAIParams.FROM: "2009-01-05", OAIParams.UNTIL:"2020-02-05", OAIParams.SET: "math"}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code=" not in text
+    assert '<ListIdentifiers>' in text
+    assert '<request verb="ListIdentifiers" metadataPrefix="arXiv" from="2009-01-05" until="2020-02-05" set="math">' in text
+    assert '<identifier>oai:arXiv.org:0704.0046</identifier>' in text
+    assert  text.count("<identifier>")==4 #could change if more data gets added to test database
+    assert "<record>" not in text
+    assert '<id>0806.4129</id>' not in text
+    assert '<doi>10.1007/s00205-010-0322-x</doi>'not in text
+
+def test_headers_starting_from_token(test_client):
+    query_data: Dict[OAIParams,str]={
+        OAIParams.VERB:OAIVerbs.LIST_IDS,
+        OAIParams.FROM:'2019-10-11',
+        OAIParams.UNTIL:'2024-12-03',
+        OAIParams.META_PREFIX:'oai_dc'
+    }
+    token=ResToken(query_data, 2)
+
+    params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.RES_TOKEN: token.token_str}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code=" not in text
+    assert "<request verb='ListIdentifiers' resumptionToken='" in text
+    assert 'verb%3DListIdentifiers%26from%3D2019-10-11%26until%3D2024-12-03%26metadataPrefix%3Doai_dc%26skip%3D2' in text
+    assert '<ListIdentifiers>' in text
+    assert  text.count("<identifier>")==5 #could change if more data gets added to test database
+    assert '<record>' not in text
+    assert '<identifier>oai:arXiv.org:1102.0372</identifier>' in text
+    assert '<dc:title>Lattice polygons and families of curves on rational surfaces</dc:title>' not in text
+    assert '<dc:identifier>http://arxiv.org/abs/2305.11452</dc:identifier>' not in text
+
+    assert '<identifier>oai:arXiv.org:1102.0366</identifier>' not in text #first entry should be skipped
+    assert 'oai:arXiv.org:1005.1251' not in text #second entry should be skipped
