@@ -235,6 +235,8 @@ def test_token_params(test_client):
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code=" not in text
+    assert "<request verb='ListRecords' resumptionToken='" in text
+    assert 'verb%3DListRecords%26from%3D2010-09-11%26set%3Dmath%26metadataPrefix%3Doai_dc%26skip%3D1' in text
 
     query_data: Dict[OAIParams,str]={
         OAIParams.VERB:OAIVerbs.LIST_RECORDS,
@@ -249,6 +251,8 @@ def test_token_params(test_client):
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code=" not in text
+    assert "<request verb='ListRecords' resumptionToken='" in text
+    assert 'verb%3DListRecords%26from%3D2008-10-11%26until%3D2023-12-03%26metadataPrefix%3Doai_dc%26skip%3D1' in text
 
     #include res token in token
     query_data: Dict[OAIParams,str]={
@@ -265,6 +269,8 @@ def test_token_params(test_client):
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code=" in text
+    assert "<request verb='ListRecords' resumptionToken='" in text
+    assert 'verb%3DListRecords%26from%3D2023-10-11%26until%3D2023-12-03%26metadataPrefix%3Doai_dc%26skip%3D300' in text
 
     #start val isnt int
     token=ResToken(query_data, "cat")
