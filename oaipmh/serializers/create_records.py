@@ -8,10 +8,11 @@ from arxiv.taxonomy.category import Category
 from arxiv.taxonomy.definitions import CATEGORIES
 
 from oaipmh.processors.create_set_list import make_set_str
+from oaipmh.requests.param_processing import create_oai_id
 
 class Header:
     def __init__(self, id:str, date:datetime, cats:List[Category]) -> None:
-        self.id=f"oai:arXiv.org:{id}"
+        self.id=create_oai_id(id)
         self.date=date
         self.sets=[]
         for cat in cats: #TODO if alias not in string, set list misses it
