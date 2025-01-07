@@ -64,6 +64,14 @@ def test_extra_params(test_client):
     assert "<error code='badArgument'>" in text
     assert "Unallowed parameter." in text
 
+def test_no_meta_format(test_client):
+    params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code='badArgument'>" in text
+    assert "metadataPrefix required" in text
+
 def test_bad_meta_format(test_client):
     params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.META_PREFIX: "pictures"}
     response = test_client.get("/oai", query_string=params)

@@ -44,7 +44,15 @@ def test_extra_params(test_client):
     assert "<error code='badArgument'>" in text
     assert "No other parameters allowed" in text
 
-    #with token
+    #extra with token
+    params = {OAIParams.VERB: OAIVerbs.LIST_SETS, OAIParams.RES_TOKEN : "math", OAIParams.META_PREFIX:"rainbow"}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code='badArgument'>" in text
+    assert "No other paramters allowed with resumptionToken" in text
+
+    #bad token
     params = {OAIParams.VERB: OAIVerbs.LIST_SETS, OAIParams.RES_TOKEN : "math"}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
