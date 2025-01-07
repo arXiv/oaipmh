@@ -1,13 +1,17 @@
 #runs tests for the code list_records and list_indetifiers share
 import pytest
+from datetime import datetime
 from typing import Dict
 
 from arxiv.taxonomy.definitions import GROUPS, ARCHIVES, CATEGORIES
 
+from oaipmh.data.oai_config import SUPPORTED_METADATA_FORMATS
 from oaipmh.data.oai_properties import OAIParams, OAIVerbs
 from oaipmh.data.oai_errors import OAIBadArgument
+from oaipmh.processors.fetch_list import create_records
 from oaipmh.processors.resume import ResToken
 from oaipmh.requests.data_queries import _parse_set
+from oaipmh.serializers.create_records import Header, arXivOldRecord, arXivRawRecord, arXivRecord, dcRecord
 
 def test_good_params(test_client):
     #good minimal params
@@ -329,9 +333,56 @@ def test_set_parser():
     with pytest.raises(OAIBadArgument, match="Set does not exist"):
         _parse_set("math:nucl-th")
 
+def test_create_headers_list(metadata_object2, metadata_object3):
+    #identifier requests only fetch the current version
+    data=[ metadata_object2, metadata_object3]
+    expected=[
+        Header("1234.56789", datetime(2023,3,1,15,7,8),[CATEGORIES['cs.AI'], CATEGORIES['hep-lat']]),
+        Header("1234.56790", datetime(2024,3,7,15,7,8),[CATEGORIES['cs.LG'], CATEGORIES['hep-lat']])
+    ]
+    result= create_records(data, True, SUPPORTED_METADATA_FORMATS['arXiv'])
+    assert expected == result
+    result= create_records(data, True, SUPPORTED_METADATA_FORMATS['arXivRaw'])
+    assert expected == result
+
+def test_create_records_list(metadata_object1, metadata_object2, metadata_object3):
+    #arXiv and arXiv old only use the current copy of metadata
+    data=[ metadata_object2, metadata_object3]
+    result= create_records(data, False, SUPPORTED_METADATA_FORMATS['arXiv'])
+    expected=[arXivRecord(metadata_object2), arXivRecord(metadata_object3)]
+    assert result==expected
+
+    result= create_records(data, False, SUPPORTED_METADATA_FORMATS['arXivOld'])
+    expected=[arXivOldRecord(metadata_object2), arXivOldRecord(metadata_object3)]
+    assert result==expected
+
+    #oai_dc and arXivRaw use all versions of metadata
+    data=[ metadata_object1, metadata_object2, metadata_object3]
+    result= create_records(data, False, SUPPORTED_METADATA_FORMATS['arXivRaw'])
+    expected=[arXivRawRecord([metadata_object1, metadata_object2]), arXivRawRecord([metadata_object3])]
+    assert result==expected
+
+    result= create_records(data, False, SUPPORTED_METADATA_FORMATS['oai_dc'])
+    expected=[dcRecord([metadata_object1, metadata_object2]), dcRecord([metadata_object3])]
+    assert result==expected
+
+    #can handle other orders of versions so long as they are all together
+    data=[metadata_object3, metadata_object2, metadata_object1]
+    result= create_records(data, False, SUPPORTED_METADATA_FORMATS['arXivRaw'])
+    expected=[arXivRawRecord([metadata_object1, metadata_object2]), arXivRawRecord([metadata_object3])]
+    assert result==expected
+
+    result= create_records(data, False, SUPPORTED_METADATA_FORMATS['oai_dc'])
+    expected=[dcRecord([metadata_object1, metadata_object2]), dcRecord([metadata_object3])]
+    assert result==expected
+
+
+
+# TODO test results over limit handling
+
+
+
 #formatting
-
-
 def test_records_from_params(test_client):
     params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.META_PREFIX: "arXiv", OAIParams.FROM: "2009-01-05", OAIParams.UNTIL:"2020-02-05", OAIParams.SET: "math"}
     response = test_client.get("/oai", query_string=params)
@@ -370,7 +421,7 @@ def test_records_starting_from_token(test_client):
     assert '<identifier>oai:arXiv.org:1102.0366</identifier>' not in text #first entry should be skipped
     assert 'oai:arXiv.org:1005.1251' not in text #second entry should be skipped
 
-def test_headers_from_params(test_client):
+def test_identifiers_from_params(test_client):
     params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "arXiv", OAIParams.FROM: "2009-01-05", OAIParams.UNTIL:"2020-02-05", OAIParams.SET: "math"}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
@@ -384,7 +435,7 @@ def test_headers_from_params(test_client):
     assert '<id>0806.4129</id>' not in text
     assert '<doi>10.1007/s00205-010-0322-x</doi>'not in text
 
-def test_headers_starting_from_token(test_client):
+def test_identifiers_starting_from_token(test_client):
     query_data: Dict[OAIParams,str]={
         OAIParams.VERB:OAIVerbs.LIST_IDS,
         OAIParams.FROM:'2019-10-11',
@@ -409,3 +460,4 @@ def test_headers_starting_from_token(test_client):
 
     assert '<identifier>oai:arXiv.org:1102.0366</identifier>' not in text #first entry should be skipped
     assert 'oai:arXiv.org:1005.1251' not in text #second entry should be skipped
+

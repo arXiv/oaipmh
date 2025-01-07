@@ -23,7 +23,7 @@ class Header:
             return False
         return (
             self.id == other.id and
-            self.date == other.date and
+            self.date.replace(tzinfo=None) == other.date.replace(tzinfo=None) and
             self.sets == other.sets
         )
     
@@ -62,6 +62,16 @@ class arXivRecord(Record):
     def  __repr__(self) -> str:
         return (f"arXivRecord({self.current_meta.paper_id}, {self.header.date.date()})")
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, arXivRecord):
+            return False
+        return (
+            self.header == other.header and
+            self.current_meta== other.current_meta and
+            self.categories== other.categories and
+            self.authors == other.authors 
+        )
+
 class arXivRawRecord(Record):
     def __init__(self, metadata: List[Metadata]):
         self.versions: List[VersionEntry]=[]
@@ -82,6 +92,16 @@ class arXivRawRecord(Record):
         
     def  __repr__(self) -> str:
         return (f"arXivRawRecord({self.current_meta.paper_id}, {self.header.date.date()})")
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, arXivRawRecord):
+            return False
+        return (
+            self.header == other.header and
+            self.current_meta== other.current_meta and
+            self.categories== other.categories and
+            self.versions == other.versions
+        )
 
     @staticmethod
     def _process_source_format(format: Optional[str], source_flags: Optional[str]) -> Optional[str]:
@@ -118,6 +138,20 @@ class dcRecord(Record):
                 self.initial_date=version.created
     def  __repr__(self) -> str:
         return (f"dcRecord({self.current_meta.paper_id}, {self.header.date.date()})")
+    
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, dcRecord):
+            return False
+        return (
+            self.header == other.header and
+            self.current_meta== other.current_meta and
+            self.categories== other.categories and
+            self.current_version_date == other.current_version_date and
+            self.authors == other.authors and
+            self.initial_date == other.initial_date and
+            self.current_meta == other.current_meta
+        )
+
     def deduplicate_cat_names(self)-> List[str]:
         result=[]
         for cat in self.categories:
@@ -132,3 +166,11 @@ class arXivOldRecord(Record):
     def  __repr__(self) -> str:
         return (f"arXivOldRecord({self.current_meta.paper_id}, {self.header.date.date()})")
     
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, arXivOldRecord):
+            return False
+        return (
+            self.header == other.header and
+            self.current_meta== other.current_meta and
+            self.categories== other.categories 
+        )

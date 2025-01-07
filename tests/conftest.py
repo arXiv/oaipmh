@@ -49,7 +49,7 @@ def metadata_object1():
         abstract="This is a dummy abstract for testing purposes.",
         license="arXiv License",
         version=1,
-        modtime=None,
+        modtime=1672585628,
         is_current=0,
         is_withdrawn=0
     )
@@ -81,7 +81,39 @@ def metadata_object2():
         abstract="This is a dummy abstract for testing purposes.",
         license="arXiv License",
         version=2,
-        modtime=None,
+        modtime=1677683228,
+        is_current=1,
+        is_withdrawn=0
+    )
+
+@pytest.fixture(scope="session")
+def metadata_object3():
+    return Metadata(
+        metadata_id=1,
+        document_id=1,
+        paper_id="1234.56790",
+        created=datetime(2024,2,1,10,3,6),
+        updated=datetime(2024,3,7,15,7,8),
+        submitter_id=42,
+        submitter_name="Jane Doe",
+        submitter_email="jane.doe@example.com",
+        source_size=2876,
+        source_format="pdf",
+        source_flags=None,
+        title="A Dummy Study on Magical Objects",
+        authors="Jane Doe",
+        abs_categories="cs.LG hep-lat",
+        comments="Fake comments",
+        proxy=None,
+        report_num=None,
+        msc_class=None,
+        acm_class=None,
+        journal_ref=None,
+        doi=None,
+        abstract="This is a dummy abstract for testing purposes.",
+        license="arXiv License",
+        version=1,
+        modtime=1709824028,
         is_current=1,
         is_withdrawn=0
     )

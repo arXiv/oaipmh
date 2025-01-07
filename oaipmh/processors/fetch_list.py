@@ -18,6 +18,7 @@ from oaipmh.serializers.output_formats import Response
 
 def fetch_list(just_ids:bool, start_date :datetime, end_date:datetime, meta_type:MetadataFormat, rq_set:Optional[Union[Group, Archive, Category]], skip: int, query_data: Dict[OAIParams, str])-> Response:
     """fetches the required data for a record for a specific format 
+    dates are in UTC, as is the data in the database columns being queried
     converts data into specific format and renders record template
     """
  
