@@ -1,5 +1,9 @@
 {% macro request_element( attributes={}) %}
-    <request{% for key, value in attributes.items() %} {{ key }}="{{ value }}"{% endfor %}>{{ url_for("general.oai", _external=True) }}</request>
+    {% if "resumptionToken" in attributes %}
+        <request verb='{{attributes.verb}}' resumptionToken='{{attributes.resumptionToken}}'>{{ url_for("general.oai", _external=True) }}</request>
+    {% else %}
+        <request{% for key, value in attributes.items() %} {{ key }}="{{ value }}"{% endfor %}>{{ url_for("general.oai", _external=True) }}</request>
+    {% endif %}
 {% endmacro %}
 
 {% macro header(header) %}

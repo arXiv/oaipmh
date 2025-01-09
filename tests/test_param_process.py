@@ -6,13 +6,15 @@ from oaipmh.data.oai_errors import OAINonexistentID
 from oaipmh.requests.param_processing import process_identifier, create_oai_id
 
 def test_process_old_id():
-    expected= Identifier("cs/0007002")
-    result=process_identifier("oai:arXiv.org:cs/0007002")
+    paper_id="cs/0007002"
+    expected= Identifier(paper_id)
+    result=process_identifier(create_oai_id(paper_id))
     assert result==expected
 
 def test_process_new_id():
-    expected= Identifier("2307.10651")
-    result=process_identifier("oai:arXiv.org:2307.10651")
+    paper_id="2307.10651"
+    expected= Identifier(paper_id)
+    result=process_identifier(create_oai_id(paper_id))
     assert result==expected
 
 def test_process_bad_id():

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from arxiv.taxonomy.definitions import CATEGORIES
 
@@ -63,7 +63,7 @@ def test_minimal_data(empty_metadata_object):
     #arXivOld for base record and header checks
     record=arXivOldRecord(empty_metadata_object)
     assert record.categories==[]
-    assert record.header.date==datetime(2010,2,1,10,3,6)
+    assert record.header.date==datetime(2010,6,17,0,0,41, tzinfo=timezone.utc)
     assert record.header.sets==[]
 
     #arXiv

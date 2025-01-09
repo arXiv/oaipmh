@@ -18,6 +18,6 @@ def process_identifier(id_str:str) -> Identifier:
     
     return arxiv_id
 
-def create_oai_id(arxiv_id: Identifier) -> str:
+def create_oai_id(arxiv_id: str) -> str:
     #turns arxiv style id into oai style id
-    return f"{ID_PREFIX}{arxiv_id.id}"
+    return f"{ID_PREFIX}{arxiv_id}"
