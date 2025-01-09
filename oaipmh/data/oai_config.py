@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from oaipmh.data.oai_properties import MetadataFormat
 
-#TODO test/ determine limits
+#TODO test/ determine limits, should they be changed for different data formats
 RECORDS_LIMIT=2000
 IDENTIFIERS_LIMIT=5000 
 

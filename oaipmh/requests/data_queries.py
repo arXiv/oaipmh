@@ -9,6 +9,7 @@ from oaipmh.data.oai_config import SUPPORTED_METADATA_FORMATS, EARLIEST_DATE
 from oaipmh.data.oai_errors import OAIBadArgument, OAIBadFormat, OAIBadResumptionToken
 from oaipmh.data.oai_properties import OAIParams, OAIVerbs
 from oaipmh.processors.get_record import do_get_record
+from oaipmh.processors.fetch_list import fetch_list
 from oaipmh.processors.resume import ResToken
 from oaipmh.serializers.output_formats import Response
 from oaipmh.requests.param_processing import process_identifier
@@ -39,6 +40,7 @@ def get_record(params: Dict[str, str]) -> Response:
 def list_data(params: Dict[str, str], just_ids: bool)-> Response:
     """runs both list queries. just_ids true for list identifiers, false for list records"""
     query_data: Dict[OAIParams, str]={OAIParams.VERB:params[OAIParams.VERB]}
+    skip_val=0
 
     #parameter processing
     given_params=set(params.keys())
@@ -46,8 +48,9 @@ def list_data(params: Dict[str, str], just_ids: bool)-> Response:
         if given_params != {OAIParams.RES_TOKEN, OAIParams.VERB}: #resumption token is exclusive
             raise OAIBadArgument(f"No other paramters allowed with {OAIParams.RES_TOKEN}")
         token=params[OAIParams.RES_TOKEN]
-        token_params, start_val=ResToken.from_token(token) 
-        query_data[OAIParams.RES_TOKEN]=token
+        token_params, skip_val=ResToken.from_token(token) 
+        current_res_token=ResToken(token_params, skip_val)
+        query_data[OAIParams.RES_TOKEN]=current_res_token.to_token()
         if params[OAIParams.VERB] != token_params[OAIParams.VERB]:
             raise OAIBadResumptionToken("token from different verb", query_data)
         params=token_params #set request parameters from token
@@ -113,9 +116,7 @@ def list_data(params: Dict[str, str], just_ids: bool)-> Response:
     if end_date> datetime.now(timezone.utc) + timedelta(days=1):
         raise OAIBadArgument("until date too late")
 
-    #TODO rest of function
-
-    return "<a>b</a>", 200, {}
+    return fetch_list(just_ids, start_date, end_date, meta_type, rq_set, skip_val , query_data)
 
 def _parse_set(set_str:str)-> Union[Group, Archive, Category]:
     """turns OAI style string into taxonomy item
