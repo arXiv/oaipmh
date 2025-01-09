@@ -1,5 +1,6 @@
 #runs tests for the code list_records and list_indetifiers share
 import pytest
+from unittest.mock import patch
 from datetime import datetime
 from typing import Dict
 
@@ -8,7 +9,7 @@ from arxiv.taxonomy.definitions import GROUPS, ARCHIVES, CATEGORIES
 from oaipmh.data.oai_config import SUPPORTED_METADATA_FORMATS
 from oaipmh.data.oai_properties import OAIParams, OAIVerbs
 from oaipmh.data.oai_errors import OAIBadArgument
-from oaipmh.processors.fetch_list import create_records
+from oaipmh.processors.fetch_list import create_records, fetch_list
 from oaipmh.processors.resume import ResToken
 from oaipmh.requests.data_queries import _parse_set
 from oaipmh.serializers.create_records import Header, arXivOldRecord, arXivRawRecord, arXivRecord, dcRecord
@@ -378,17 +379,212 @@ def test_create_records_list(metadata_object1, metadata_object2, metadata_object
     data=[metadata_object3, metadata_object2, metadata_object1]
     result= create_records(data, False, SUPPORTED_METADATA_FORMATS['arXivRaw'])
     expected=[arXivRawRecord([metadata_object1, metadata_object2]), arXivRawRecord([metadata_object3])]
+    result.sort() 
     assert result==expected
 
     result= create_records(data, False, SUPPORTED_METADATA_FORMATS['oai_dc'])
     expected=[dcRecord([metadata_object1, metadata_object2]), dcRecord([metadata_object3])]
+    result.sort() 
     assert result==expected
 
+def test_no_res_token_needed(test_client):
+    with patch('oaipmh.processors.fetch_list.IDENTIFIERS_LIMIT', 1000):
+        params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc"}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "resumptionToken" not in text
+    
+def test_enforces_limits(test_client):
+    with patch('oaipmh.processors.fetch_list.IDENTIFIERS_LIMIT', 10):
+        params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc"}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "resumptionToken" in text
+        assert text.count('<header>') == 10
 
+    with patch('oaipmh.processors.fetch_list.IDENTIFIERS_LIMIT', 10):
+        params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.META_PREFIX: "oai_dc"}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "resumptionToken" not in text
+        assert text.count('<header>') > 10
 
-# TODO test results over limit handling
+    with patch('oaipmh.processors.fetch_list.RECORDS_LIMIT', 10):
+        params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc"}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "resumptionToken" not in text
+        assert text.count('<header>') > 10
 
+    with patch('oaipmh.processors.fetch_list.RECORDS_LIMIT', 10):
+        params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.META_PREFIX: "oai_dc"}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "resumptionToken" in text
+        assert text.count('<header>') == 10
 
+def __get_res_token(text:str)-> str:
+    import xml.etree.ElementTree as ET
+    root = ET.fromstring(text)
+    namespace = {'oai': 'http://www.openarchives.org/OAI/2.0/'}
+    resumption_token = root.find('.//oai:resumptionToken', namespace)
+    return resumption_token.text or ''
+
+def test_resumption_sequencing1(test_client):
+    #makes sure a sequence doesnt miss anything
+    limit=2
+    with patch('oaipmh.processors.fetch_list.IDENTIFIERS_LIMIT', limit):
+        params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc"}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "resumptionToken" in text
+        assert text.count("<header>")==limit
+        assert '<identifier>oai:arXiv.org:chao-dyn/9510015</identifier>' in text
+        assert '<identifier>oai:arXiv.org:hep-th/9901002</identifier>' in text
+        token=__get_res_token(text)
+        assert token[-1] == '0' #could change with different token ecnoding scheme
+
+        params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.RES_TOKEN: token}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "resumptionToken" in text
+        assert text.count("<header>")==limit
+        assert '<identifier>oai:arXiv.org:0704.0046</identifier>' in text
+        assert '<identifier>oai:arXiv.org:1008.3222</identifier>' in text
+        token=__get_res_token(text)
+        assert token[-1] == '0' #could change with different token ecnoding scheme
+
+        """a note on the following results: 
+        if you generate a large list of identifiers, the upcoming expected papers will NOT be the next two in the list. 
+        Both the list from the database and the list presented to users are sorted first by their timestamp, then by paper_id.
+        However, the list displayed to the end user is sorted by the timestamp to the resolution of a day where the database sorting resolution is down to the second.
+        This means that the database will cut off a paper with an earlier paper_id that was modified at a later time on the same date.
+        This is expected behavior, but may look funny at very low limit chunks where all papers have the same date. 
+        """
+
+        params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.RES_TOKEN: token}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "resumptionToken" in text
+        assert text.count("<header>")==limit
+        #TODO im pretty sure 1102.0299 should be here
+        assert '<identifier>oai:arXiv.org:0811.2813</identifier>' not in text #would be next in a bigger list
+        assert '<identifier>oai:arXiv.org:1102.0299</identifier>' in text
+        assert '<identifier>oai:arXiv.org:1102.0285</identifier>' in text
+        token=__get_res_token(text)
+        assert token[-1] == '2' #could change with different token ecnoding scheme
+
+        params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.RES_TOKEN: token}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "resumptionToken" in text
+        assert text.count("<header>")==limit
+        assert '<identifier>oai:arXiv.org:0901.0022</identifier>' in text
+        assert '<identifier>oai:arXiv.org:1001.2600</identifier>' in text
+        assert '<identifier>oai:arXiv.org:1102.0304</identifier>' not in text #has the same modtime as 1001.2600 but later in paper_id ordering
+        token=__get_res_token(text)
+        assert token[-1] == '4' #could change with different token ecnoding scheme
+     
+def test_resumption_sequencing2(test_client):
+    #more testing a sequence doesnt miss things at different breakpoints
+    limit=3
+    with patch('oaipmh.processors.fetch_list.IDENTIFIERS_LIMIT', limit):
+        params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc"}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "resumptionToken" in text
+        assert text.count("<header>")==limit
+        assert '<identifier>oai:arXiv.org:chao-dyn/9510015</identifier>' in text
+        assert '<identifier>oai:arXiv.org:hep-th/9901002</identifier>' in text
+        assert '<identifier>oai:arXiv.org:0704.0046</identifier>' in text
+        token=__get_res_token(text)
+        assert token[-1] == '0' #could change with different token ecnoding scheme
+
+        params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.RES_TOKEN: token}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "resumptionToken" in text
+        assert text.count("<header>")==limit
+        assert '<identifier>oai:arXiv.org:1102.0299</identifier>' in text
+        assert '<identifier>oai:arXiv.org:1102.0285</identifier>' in text
+        assert '<identifier>oai:arXiv.org:1008.3222</identifier>' in text
+        token=__get_res_token(text)
+        assert token[-1] == '2' #could change with different token ecnoding scheme
+
+        params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.RES_TOKEN: token}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "resumptionToken" in text
+        assert text.count("<header>")==limit
+        assert '<identifier>oai:arXiv.org:0901.0022</identifier>' in text
+        assert '<identifier>oai:arXiv.org:1001.2600</identifier>' in text
+        assert '<identifier>oai:arXiv.org:1102.0304</identifier>' in text
+        token=__get_res_token(text)
+        assert token[-1] == '5' #could change with different token ecnoding scheme
+
+def test_resumption_sequencing_records(test_client):
+    #makes sure a sequence doesnt miss anything
+    limit=2
+    with patch('oaipmh.processors.fetch_list.RECORDS_LIMIT', limit):
+        params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.META_PREFIX: "oai_dc"}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "resumptionToken" in text
+        assert text.count("<header>")==limit
+        assert '<identifier>oai:arXiv.org:chao-dyn/9510015</identifier>' in text
+        assert '<identifier>oai:arXiv.org:hep-th/9901002</identifier>' in text
+        token=__get_res_token(text)
+        assert token[-1] == '0' #could change with different token ecnoding scheme
+
+        params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.RES_TOKEN: token}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "resumptionToken" in text
+        assert text.count("<header>")==limit
+        assert '<identifier>oai:arXiv.org:0704.0046</identifier>' in text
+        assert '<identifier>oai:arXiv.org:1008.3222</identifier>' in text
+        token=__get_res_token(text)
+        assert token[-1] == '0' #could change with different token ecnoding scheme
+
+        params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.RES_TOKEN: token}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "resumptionToken" in text
+        assert text.count("<header>")==limit
+        #TODO im pretty sure 1102.0299 should be here
+        assert '<identifier>oai:arXiv.org:0811.2813</identifier>' not in text #would be next in a bigger list
+        assert '<identifier>oai:arXiv.org:1102.0299</identifier>' in text
+        assert '<identifier>oai:arXiv.org:1102.0285</identifier>' in text
+        token=__get_res_token(text)
+        assert token[-1] == '2' #could change with different token ecnoding scheme
+
+        params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.RES_TOKEN: token}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "resumptionToken" in text
+        assert text.count("<header>")==limit
+        assert '<identifier>oai:arXiv.org:0901.0022</identifier>' in text
+        assert '<identifier>oai:arXiv.org:1001.2600</identifier>' in text
+        assert '<identifier>oai:arXiv.org:1102.0304</identifier>' not in text #has the same modtime as 1001.2600 but later in paper_id ordering
+        token=__get_res_token(text)
+        assert token[-1] == '4' #could change with different token ecnoding scheme
+  
 
 #formatting
 def test_records_from_params(test_client):

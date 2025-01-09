@@ -82,9 +82,9 @@ def get_list_data(just_ids:bool, start_date :datetime, end_date:datetime, all_ve
             .options(load_only(
                 Metadata.paper_id,
                 Metadata.abs_categories,
+                Metadata.is_current,
                 Metadata.modtime
             ))
-            .order_by(Metadata.paper_id)
             .all()   
         )
     else: #for listing records instead of just header
@@ -101,7 +101,6 @@ def get_list_data(just_ids:bool, start_date :datetime, end_date:datetime, all_ve
                 .filter(Metadata.document_id.in_(selected_doc_ids.select()), 
                         Metadata.is_current == 1
                 )
-                .order_by(Metadata.paper_id)
                 .all()   
             )
 

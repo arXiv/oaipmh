@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union, List
+from typing import Dict, Optional, Union, List, Tuple
 from datetime import datetime, timezone
 
 from flask import render_template
@@ -13,6 +13,7 @@ from oaipmh.data.oai_errors import OAINoRecordsMatch
 from oaipmh.data.oai_config import RECORDS_LIMIT, IDENTIFIERS_LIMIT
 from oaipmh.data.oai_properties import OAIParams, MetadataFormat
 from oaipmh.processors.resume import ResToken
+from oaipmh.requests.param_processing import create_oai_id
 from oaipmh.serializers.create_records import arXivOldRecord, arXivRawRecord, arXivRecord, dcRecord, Header, Record
 from oaipmh.serializers.output_formats import Response
 
@@ -29,35 +30,35 @@ def fetch_list(just_ids:bool, start_date :datetime, end_date:datetime, meta_type
     if not data:
         raise OAINoRecordsMatch(query_params=query_data)
     
+    last_paper, last_datetime=find_last_result(data)
     objects=create_records(data, just_ids, meta_type)
+    objects.sort()
 
-    #resumption token handling
+    #create resumption token if more results than limit
     res_token=None
     if len(objects)>limit: 
-        if just_ids:
-            last_date=objects[-1].date.date()
-            first_date=objects[0].date.date()
-        else:
-            last_date=objects[-1].header.date.date()
-            first_date=objects[0].header.date.date()
+        last_date=last_datetime.date()
+        first_date= objects[0].date.date() if just_ids else objects[0].header.date.date()
 
         if last_date== first_date: #all the same day
-            objects.pop() #remove the extra item
             res_token=ResToken(query_data, skip+limit)
 
         else: #resume from final day
-            to_skip=0
-            for i in range(len(objects) - 1, -1, -1):  # iterate backward through list
-                to_skip+=1
-                if just_ids:
-                    compare_date=objects[i].date.date()
-                else:
-                    compare_date=objects[i].header.date.date()
-                if compare_date != last_date:
-                    new_query=query_data
-                    new_query[OAIParams.FROM]=last_date.strftime('%Y-%m-%d')
-                    res_token=ResToken(new_query, to_skip)
+            #count how many entries from the last day are being displayed
+            to_skip=-1 #we are already dropping the one over the limit
+            for obj in reversed(objects): 
+                compare_date = obj.date.date() if just_ids else obj.header.date.date()
+                if compare_date != last_date:  # Stop when reaching a different date
                     break
+                to_skip += 1  
+
+            #create the new query
+            new_query=query_data
+            new_query[OAIParams.FROM]=last_date.strftime('%Y-%m-%d')
+            res_token=ResToken(new_query, to_skip)
+
+        #remove the extra object above limit
+        objects = [item for item in objects if (item.id if just_ids else item.header.id) != last_paper]
 
     if just_ids:
         response=render_template("list_identifiers.xml", 
@@ -76,6 +77,25 @@ def fetch_list(just_ids:bool, start_date :datetime, end_date:datetime, meta_type
             )
     headers={"Content-Type":"application/xml"}
     return response, 200, headers
+
+def find_last_result(data: List[Metadata])->Tuple[str, datetime]:
+    """finds the paper that would have been the last selected document from the database query.
+    Final paper is dropped if limit is exceeded. Selection is done at this point before dates can be assigned from other columns like created
+    """
+    last_modtime=0
+    latest_paper=""
+    for item in data:
+        if item.is_current and item.modtime >= last_modtime:
+            if item.modtime > last_modtime:
+                last_modtime=item.modtime
+                latest_paper=item.paper_id
+            else: #if they are equal timestamps
+                if latest_paper < item.paper_id:
+                    last_modtime=item.modtime
+                    latest_paper=item.paper_id
+    
+    last_date=datetime.fromtimestamp(last_modtime, tz=timezone.utc)
+    return create_oai_id(latest_paper), last_date
 
 def create_records(data: List[Metadata], just_ids:bool, format:MetadataFormat)->List[Union[Header, Record]]:
     """turns data from the database into header or Record objects and sorts them"""
@@ -116,6 +136,5 @@ def create_records(data: List[Metadata], just_ids:bool, format:MetadataFormat)->
             else:
                 items.append(dcRecord(current_group))
 
-    items.sort()
     return items
 

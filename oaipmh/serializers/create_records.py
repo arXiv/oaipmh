@@ -41,10 +41,7 @@ class Record: #base record class
         if current_meta.abs_categories:
             for cat in current_meta.abs_categories.split():
                 self.categories.append(CATEGORIES[cat])
-        if current_meta.updated:
-            date= current_meta.updated 
-        else:
-            date=datetime.fromtimestamp(current_meta.modtime, tz=timezone.utc)
+        date=datetime.fromtimestamp(current_meta.modtime, tz=timezone.utc)
         self.header = Header(current_meta.paper_id, date, self.categories)
         self.current_meta = current_meta
 
