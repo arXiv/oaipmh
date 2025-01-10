@@ -14,7 +14,10 @@ class Settings(arxiv_base.Settings):
     SQLALCHEMY_MAX_OVERFLOW: Optional[int] = 0
     SQLALCHEMY_POOL_SIZE: Optional[int] = 10
 
-    FLASKS3_BUCKET_NAME: str = "some_bucket" #TODO needed to use url for for some reason?
+    FLASKS3_CDN_DOMAIN: str = "static.arxiv.org"
+    FLASKS3_USE_HTTPS: bool = True
+    FLASKS3_FORCE_MIMETYPE: bool = True
+    FLASKS3_ACTIVE: bool = False
 
     def check(self) -> None:
         """A check and fix up of a settings object."""
