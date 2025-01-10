@@ -26,7 +26,8 @@ def display_set_structure(query_data: Dict[OAIParams, Any]) -> Response:
                 categories= CATEGORIES_ACTIVE,
                 to_set= make_set_str
     )
-    return response, 200, {}
+    headers={'Surrogate-Control': f'max-age=31536000'} #a year, shouldn't change
+    return response, 200, headers
 
 def make_set_str(item: Union[Group, Archive, Category]) -> str:
     """helper function to convert arXiv category data into OAI set structure

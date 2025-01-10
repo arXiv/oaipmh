@@ -21,7 +21,8 @@ def identify(params: Dict[str, str]) -> Response:
         query_params=query_data,
         config_data=oai_config
         )
-    headers={"Content-Type":"application/xml"}
+    headers={'Surrogate-Control': f'max-age=31536000'} #a year, shouldn't change
+    
     return response, 200, headers
 
 def list_metadata_formats(params: Dict[str, str]) -> Response:
@@ -49,7 +50,8 @@ def list_metadata_formats(params: Dict[str, str]) -> Response:
         query_params=query_data,
         formats=oai_config.SUPPORTED_METADATA_FORMATS
         )
-    headers={"Content-Type":"application/xml"}
+    headers={'Surrogate-Control': f'max-age=31536000'} #a year, shouldn't change
+    
     return response, 200, headers
 
 def list_sets(params: Dict[str, str]) -> Response:

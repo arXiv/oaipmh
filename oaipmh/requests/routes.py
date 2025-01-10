@@ -1,6 +1,8 @@
 from typing import Dict
 from flask import Blueprint, request, send_file
 
+from arxiv.integration.fastly.headers import add_surrogate_key
+
 from oaipmh.requests.info_queries import identify, list_metadata_formats, list_sets
 from oaipmh.requests.data_queries import get_record, list_data
 from oaipmh.serializers.output_formats import Response
@@ -41,6 +43,7 @@ def oai() -> Response:
             raise OAIBadVerb(f"Invalid verb provided") #dont keep invalid verb
         
     headers["Content-Type"]="application/xml"
+    headers=add_surrogate_key(headers,["oai"])
 
     return response, code, headers
 
