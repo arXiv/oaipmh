@@ -5,11 +5,17 @@ def test_good_params(test_client):
     params = {OAIParams.VERB: OAIVerbs.GET_RECORD, OAIParams.ID: "oai:arXiv.org:0806.4129",  OAIParams.META_PREFIX: "oai_dc"}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
+    assert response.headers["Content-Type"] == "application/xml"
+    assert response.headers["Surrogate-Control"]==('max-age=800000')
+    assert response.headers["Surrogate-Key"] == "paper-id-0806.4129 oai"
     text=response.get_data(as_text=True)
     assert "<error code=" not in text
 
     response = test_client.post("/oai", data=params)
     assert response.status_code == 200 
+    assert response.headers["Content-Type"] == "application/xml"
+    assert response.headers["Surrogate-Control"]==('max-age=800000')
+    assert response.headers["Surrogate-Key"] == "paper-id-0806.4129 oai"
     text=response.get_data(as_text=True)
     assert "<error code=" not in text
 

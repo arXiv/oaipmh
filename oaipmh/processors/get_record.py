@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from flask import render_template
 
 from arxiv.identifier import Identifier
+from arxiv.integration.fastly.headers import add_surrogate_key
 
 from oaipmh.processors.db import get_record_data
 from oaipmh.data.oai_errors import OAINonexistentID
@@ -35,6 +36,7 @@ def do_get_record(arxiv_id: Identifier, format: MetadataFormat, query_data: Dict
         record=record,
         format=format.prefix
         )
-    headers={"Content-Type":"application/xml"}
+    headers={'Surrogate-Control': 'max-age=800000'} 
+    headers=add_surrogate_key(headers,[f"paper-id-{arxiv_id.id}"]) 
     return response, 200, headers
 
