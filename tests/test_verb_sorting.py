@@ -85,6 +85,11 @@ def test_no_verb(test_client):
     
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/xml"
+    cache_timer=response.headers["Surrogate-Control"]
+    assert cache_timer[:8]=='max-age='
+    assert int(cache_timer[8:]) <= 3600*24
+    assert response.headers["Surrogate-Key"] == "oai"
     assert "<error code='badVerb'>" in response.text
     assert "Invalid verb provided" in response.text
 
@@ -98,6 +103,11 @@ def test_bad_verb(test_client):
     
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/xml"
+    cache_timer=response.headers["Surrogate-Control"]
+    assert cache_timer[:8]=='max-age='
+    assert int(cache_timer[8:]) <= 3600*24
+    assert response.headers["Surrogate-Key"] == "oai"
     assert "<error code='badVerb'>" in response.text
     assert "Invalid verb provided" in response.text
 

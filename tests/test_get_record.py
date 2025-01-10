@@ -23,6 +23,11 @@ def test_bad_meta_format(test_client):
     params = {OAIParams.VERB: OAIVerbs.GET_RECORD, OAIParams.ID: "oai:arXiv.org:2307.10651",  OAIParams.META_PREFIX: "pictures"}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
+    assert response.headers["Content-Type"] == "application/xml"
+    cache_timer=response.headers["Surrogate-Control"]
+    assert cache_timer[:8]=='max-age='
+    assert int(cache_timer[8:]) <= 3600*24
+    assert response.headers["Surrogate-Key"] == "oai"
     text=response.get_data(as_text=True)
     assert "<error code='cannotDisseminateFormat'>" in text
     assert "Did not recognize requested format" in text
@@ -63,7 +68,12 @@ def test_missing_params(test_client):
     # missing metadata_prefix
     params = {OAIParams.VERB: OAIVerbs.GET_RECORD, OAIParams.ID: "oai:arXiv.org:2307.10651"}
     response = test_client.get("/oai", query_string=params)
-    assert response.status_code == 200 
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/xml"
+    cache_timer=response.headers["Surrogate-Control"]
+    assert cache_timer[:8]=='max-age='
+    assert int(cache_timer[8:]) <= 3600*24
+    assert response.headers["Surrogate-Key"] == "oai" 
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" in text
     assert "Parameters provided did not match expected." in text
