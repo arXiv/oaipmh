@@ -47,21 +47,27 @@ def oai() -> Response:
 
     return response, code, headers
 
+def __send_schema(file_path:str)-> Response:
+    response= send_file(file_path, mimetype="application/xml")
+    response.headers=add_surrogate_key(response.headers,["oai"])
+    response.headers['Surrogate-Control']='max-age=31536000'
+    return response
+
 @blueprint.route("/OAI/arXivRaw.xsd", methods=['GET', 'POST'])
 def schema_arXivRaw() -> Response:
     file_path = "templates/schema/arXivRaw.xsd" 
-    return send_file(file_path, mimetype="application/xml")
+    return __send_schema(file_path)
 
 
 @blueprint.route("/OAI/arXiv.xsd", methods=['GET', 'POST'])
 def schema_arXiv() -> Response:
     file_path = "templates/schema/arXiv.xsd" 
-    return send_file(file_path, mimetype="application/xml")
+    return __send_schema(file_path)
 
 @blueprint.route("/OAI/arXivOld.xsd", methods=['GET', 'POST'])
 def schema_arXivOld() -> Response:
     file_path = "templates/schema/arXivOld.xsd" 
-    return send_file(file_path, mimetype="application/xml")
+    return __send_schema(file_path)
 
 @blueprint.route('/favicon.ico')
 def favicon():
