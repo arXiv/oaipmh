@@ -20,20 +20,16 @@ def test_good_params(test_client):
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
     assert response.headers["Content-Type"] == "application/xml"
-    cache_header= response.headers["Surrogate-Control"]
-    assert cache_header[0:8]==('max-age=')
-    assert int(cache_header[8:])<= 60*60*24
-    assert response.headers["Surrogate-Key"] == "oai" 
+    assert response.headers["Surrogate-Control"]==('max-age=345600')
+    assert response.headers["Surrogate-Key"] == "announce oai" 
     text=response.get_data(as_text=True)
     assert "<error code=" not in text
 
     response = test_client.post("/oai", data=params)
     assert response.status_code == 200 
     assert response.headers["Content-Type"] == "application/xml"
-    cache_header= response.headers["Surrogate-Control"]
-    assert cache_header[0:8]==('max-age=')
-    assert int(cache_header[8:])<= 60*60*24
-    assert response.headers["Surrogate-Key"] == "oai" 
+    assert response.headers["Surrogate-Control"]==('max-age=345600')
+    assert response.headers["Surrogate-Key"] == "announce oai"
     text=response.get_data(as_text=True)
     assert "<error code=" not in text
 
@@ -41,20 +37,16 @@ def test_good_params(test_client):
     params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.FROM: "2009-01-05", OAIParams.UNTIL:"2020-02-05", OAIParams.SET: "math"}
     response = test_client.get("/oai", query_string=params)
     assert response.headers["Content-Type"] == "application/xml"
-    cache_header= response.headers["Surrogate-Control"]
-    assert cache_header[0:8]==('max-age=')
-    assert int(cache_header[8:])<= 60*60*24
-    assert response.headers["Surrogate-Key"] == "oai" 
+    assert response.headers["Surrogate-Control"]==('max-age=345600')
+    assert response.headers["Surrogate-Key"] == "announce oai"
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code=" not in text
 
     response = test_client.post("/oai", data=params)
     assert response.headers["Content-Type"] == "application/xml"
-    cache_header= response.headers["Surrogate-Control"]
-    assert cache_header[0:8]==('max-age=')
-    assert int(cache_header[8:])<= 60*60*24
-    assert response.headers["Surrogate-Key"] == "oai" 
+    assert response.headers["Surrogate-Control"]==('max-age=345600')
+    assert response.headers["Surrogate-Key"] == "announce oai"
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code=" not in text
@@ -63,20 +55,16 @@ def test_good_params(test_client):
     params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.UNTIL:"2020-02-05", OAIParams.SET: "math"}
     response = test_client.get("/oai", query_string=params)
     assert response.headers["Content-Type"] == "application/xml"
-    cache_header= response.headers["Surrogate-Control"]
-    assert cache_header[0:8]==('max-age=')
-    assert int(cache_header[8:])<= 60*60*24
-    assert response.headers["Surrogate-Key"] == "oai" 
+    assert response.headers["Surrogate-Control"]==('max-age=345600')
+    assert response.headers["Surrogate-Key"] == "announce oai"
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code=" not in text
 
     response = test_client.post("/oai", data=params)
     assert response.headers["Content-Type"] == "application/xml"
-    cache_header= response.headers["Surrogate-Control"]
-    assert cache_header[0:8]==('max-age=')
-    assert int(cache_header[8:])<= 60*60*24
-    assert response.headers["Surrogate-Key"] == "oai" 
+    assert response.headers["Surrogate-Control"]==('max-age=345600')
+    assert response.headers["Surrogate-Key"] == "announce oai"
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
     assert "<error code=" not in text
