@@ -75,7 +75,12 @@ def fetch_list(just_ids:bool, start_date :datetime, end_date:datetime, meta_type
             format=meta_type.prefix,
             token=res_token
             )
-    headers={"Content-Type":"application/xml"}
+    
+    #expire at utc midnight
+    now = datetime.now(timezone.utc)
+    seconds_until_midnight = (24 * 60 * 60) - (now.hour * 3600 + now.minute * 60 + now.second)
+    headers={'Surrogate-Control': f'max-age={seconds_until_midnight}'}
+
     return response, 200, headers
 
 def find_last_result(data: List[Metadata])->Tuple[str, datetime]:
