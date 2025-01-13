@@ -8,6 +8,7 @@ from werkzeug.exceptions import HTTPException
 
 from arxiv.base import Base
 from arxiv.db import config_query_timing, configure_db
+from arxiv.integration.fastly.headers import add_surrogate_key
 
 from oaipmh.data.oai_errors import OAIException
 from oaipmh.config import Settings
@@ -41,7 +42,13 @@ def create_web_app(**kwargs) -> Flask: # type: ignore
         response=render_template("errors.xml", 
                 response_date=datetime.now(timezone.utc),
                 error=e)
-        headers={"Content-Type":"application/xml"}
+        
+        now = datetime.now(timezone.utc)
+        seconds_until_midnight = (24 * 60 * 60) - (now.hour * 3600 + now.minute * 60 + now.second)
+        headers={"Content-Type":"application/xml",
+                'Surrogate-Control': f'max-age={int(seconds_until_midnight)}'
+        }
+        headers=add_surrogate_key(headers,["oai"])
         return response, 200, headers
     
     app.jinja_env.trim_blocks = True

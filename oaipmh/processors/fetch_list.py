@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from flask import render_template
 
 from arxiv.db.models import Metadata
+from arxiv.integration.fastly.headers import add_surrogate_key
 from arxiv.taxonomy.category import Group, Archive, Category
 from arxiv.taxonomy.definitions import CATEGORIES
 
@@ -75,7 +76,11 @@ def fetch_list(just_ids:bool, start_date :datetime, end_date:datetime, meta_type
             format=meta_type.prefix,
             token=res_token
             )
-    headers={"Content-Type":"application/xml"}
+    
+
+    headers={'Surrogate-Control': f'max-age=345600'} #gets cleared by announce
+    headers=add_surrogate_key(headers,["announce"])        
+              
     return response, 200, headers
 
 def find_last_result(data: List[Metadata])->Tuple[str, datetime]:

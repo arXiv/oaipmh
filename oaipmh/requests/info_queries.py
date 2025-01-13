@@ -21,7 +21,8 @@ def identify(params: Dict[str, str]) -> Response:
         query_params=query_data,
         config_data=oai_config
         )
-    headers={"Content-Type":"application/xml"}
+    headers={'Surrogate-Control': f'max-age=31536000'} #a year, shouldn't change
+    
     return response, 200, headers
 
 def list_metadata_formats(params: Dict[str, str]) -> Response:
@@ -39,6 +40,7 @@ def list_metadata_formats(params: Dict[str, str]) -> Response:
         identifier_str=params[OAIParams.ID]
         arxiv_id=process_identifier(identifier_str)
         query_data[OAIParams.ID]=identifier_str
+        #TODO do i have to check this identifier actually exists?
         #all formats are available for all items so we dont actually care about looking it up
     else: #give formats repository supports
         if given_params != {OAIParams.VERB}:
@@ -49,7 +51,8 @@ def list_metadata_formats(params: Dict[str, str]) -> Response:
         query_params=query_data,
         formats=oai_config.SUPPORTED_METADATA_FORMATS
         )
-    headers={"Content-Type":"application/xml"}
+    headers={'Surrogate-Control': f'max-age=31536000'} #a year, shouldn't change
+    
     return response, 200, headers
 
 def list_sets(params: Dict[str, str]) -> Response:

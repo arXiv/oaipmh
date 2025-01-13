@@ -1,6 +1,8 @@
 from typing import Dict
 from flask import Blueprint, request, send_file
 
+from arxiv.integration.fastly.headers import add_surrogate_key
+
 from oaipmh.requests.info_queries import identify, list_metadata_formats, list_sets
 from oaipmh.requests.data_queries import get_record, list_data
 from oaipmh.serializers.output_formats import Response
@@ -41,24 +43,31 @@ def oai() -> Response:
             raise OAIBadVerb(f"Invalid verb provided") #dont keep invalid verb
         
     headers["Content-Type"]="application/xml"
+    headers=add_surrogate_key(headers,["oai"])
 
     return response, code, headers
+
+def __send_schema(file_path:str)-> Response:
+    response= send_file(file_path, mimetype="application/xml")
+    response.headers=add_surrogate_key(response.headers,["oai"])
+    response.headers['Surrogate-Control']='max-age=31536000'
+    return response
 
 @blueprint.route("/OAI/arXivRaw.xsd", methods=['GET', 'POST'])
 def schema_arXivRaw() -> Response:
     file_path = "templates/schema/arXivRaw.xsd" 
-    return send_file(file_path, mimetype="application/xml")
+    return __send_schema(file_path)
 
 
 @blueprint.route("/OAI/arXiv.xsd", methods=['GET', 'POST'])
 def schema_arXiv() -> Response:
     file_path = "templates/schema/arXiv.xsd" 
-    return send_file(file_path, mimetype="application/xml")
+    return __send_schema(file_path)
 
 @blueprint.route("/OAI/arXivOld.xsd", methods=['GET', 'POST'])
 def schema_arXivOld() -> Response:
     file_path = "templates/schema/arXivOld.xsd" 
-    return send_file(file_path, mimetype="application/xml")
+    return __send_schema(file_path)
 
 @blueprint.route('/favicon.ico')
 def favicon():
