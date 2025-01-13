@@ -498,12 +498,11 @@ def test_resumption_sequencing1(test_client):
         text=response.get_data(as_text=True)
         assert "resumptionToken" in text
         assert text.count("<header>")==limit
-        #TODO im pretty sure 1102.0299 should be here
         assert '<identifier>oai:arXiv.org:0811.2813</identifier>' not in text #would be next in a bigger list
         assert '<identifier>oai:arXiv.org:1102.0299</identifier>' in text
         assert '<identifier>oai:arXiv.org:1102.0285</identifier>' in text
         token=__get_res_token(text)
-        assert token[-1] == '2' #could change with different token ecnoding scheme
+        assert token[-1] == '2' #could change with different token encoding scheme
 
         params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.RES_TOKEN: token}
         response = test_client.get("/oai", query_string=params)
@@ -589,12 +588,11 @@ def test_resumption_sequencing_records(test_client):
         text=response.get_data(as_text=True)
         assert "resumptionToken" in text
         assert text.count("<header>")==limit
-        #TODO im pretty sure 1102.0299 should be here
         assert '<identifier>oai:arXiv.org:0811.2813</identifier>' not in text #would be next in a bigger list
         assert '<identifier>oai:arXiv.org:1102.0299</identifier>' in text
         assert '<identifier>oai:arXiv.org:1102.0285</identifier>' in text
         token=__get_res_token(text)
-        assert token[-1] == '2' #could change with different token ecnoding scheme
+        assert token[-1] == '2' #could change with different token encoding scheme
 
         params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.RES_TOKEN: token}
         response = test_client.get("/oai", query_string=params)
