@@ -44,12 +44,6 @@ def create_web_app(**kwargs) -> Flask: # type: ignore
         headers={"Content-Type":"application/xml"}
         return response, 200, headers
     
-    #TODO make this actually trigger
-    @app.errorhandler(HTTPException)
-    def handle_http_error(e):
-        print("main error handler ran!")
-        return e.description, e.code, {}
-
     app.jinja_env.trim_blocks = True
     app.jinja_env.lstrip_blocks = True
     if not app.jinja_env.globals:
