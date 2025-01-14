@@ -5,7 +5,7 @@ from arxiv.authors import parse_author_affil
 from arxiv.db.models import Metadata
 from arxiv.document.version import VersionEntry
 from arxiv.taxonomy.category import Category
-from arxiv.taxonomy.definitions import CATEGORIES
+from arxiv.taxonomy.definitions import CATEGORIES, ARCHIVES_SUBSUMED
 
 from oaipmh.processors.create_set_list import make_set_str
 from oaipmh.requests.param_processing import create_oai_id
@@ -39,8 +39,18 @@ class Record: #base record class
     def __init__(self, current_meta: Metadata):
         self.categories: List[Category]=[]
         if current_meta.abs_categories:
-            for cat in current_meta.abs_categories.split():
-                self.categories.append(CATEGORIES[cat])
+            for word in current_meta.abs_categories.split():
+                cat=CATEGORIES[word]
+                if not cat.alt_name:
+                    self.categories.append(cat)
+                else: #handle aliases
+                    if cat not in self.categories and cat.is_active: #dont add duplicates
+                        self.categories.append(cat)
+                    if cat.alt_name not in ARCHIVES_SUBSUMED.keys(): #dont add in historical names
+                        alt_cat= CATEGORIES[cat.alt_name]
+                        if alt_cat not in self.categories:
+                            self.categories.append(alt_cat)
+                    
         date=datetime.fromtimestamp(current_meta.modtime, tz=timezone.utc)
         self.header = Header(current_meta.paper_id, date, self.categories)
         self.current_meta = current_meta
