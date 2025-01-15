@@ -36,7 +36,7 @@ SUPPORTED_METADATA_FORMATS={
 REPOSITORY_NAME='arXiv'
 BASE_URL='https://arxiv.org/oai'
 PROTOCOL_VERSION='2.0'
-EARLIEST_DATE=datetime(2007, 5, 23, 0, 0, tzinfo=timezone.utc) #TODO change?
+EARLIEST_DATE=datetime(1997, 1, 30, 0, 0, tzinfo=timezone.utc) #earliest modtime date in database
 DELETED_RECORD='persistent'
 GRANULARITY='YYYY-MM-DD'
 ADMIN_EMAIL='help@arxiv.org'

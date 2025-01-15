@@ -168,7 +168,7 @@ def test_bad_date_params(test_client):
     assert "until date must be greater than or equal to from date" in text
 
     #start too early
-    params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.UNTIL: "2024-02-08", OAIParams.FROM:"2001-03-05", OAIParams.SET: "math"}
+    params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.UNTIL: "2024-02-08", OAIParams.FROM:"1996-03-05", OAIParams.SET: "math"}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)

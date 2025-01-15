@@ -37,7 +37,7 @@ def test_contents(test_client):
     text=response.get_data(as_text=True)
     assert "<repositoryName>arXiv</repositoryName>" in text
     assert "<baseURL>https://arxiv.org/oai</baseURL>" in text
-    assert "<earliestDatestamp>2007-05-23</earliestDatestamp>" in text
+    assert "<earliestDatestamp>1997-01-30</earliestDatestamp>" in text
     assert "<granularity>YYYY-MM-DD</granularity>" in text
     assert "<description>" in text
     assert "<text>Full-content harvesting not permitted (except by special arrangement)</text>" in text
