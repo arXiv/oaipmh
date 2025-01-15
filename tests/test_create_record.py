@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+import copy
 
 from arxiv.taxonomy.definitions import CATEGORIES
 
@@ -83,3 +84,34 @@ def test_minimal_data(empty_metadata_object):
     assert entry.size_kilobytes==0
     assert entry.source_flag is None
     
+def test_alternate_categories(metadata_object2):
+    meta=copy.copy(metadata_object2)
+
+    #adds alias both directions
+    meta.abs_categories='math-ph'
+    record=arXivRecord(meta)
+    assert record.categories==[CATEGORIES['math-ph'], CATEGORIES['math.MP']]
+    meta.abs_categories='math.MP'
+    record=arXivRecord(meta)
+    assert record.categories==[ CATEGORIES['math.MP'], CATEGORIES['math-ph']]
+
+    #dont add multiple times
+    meta.abs_categories='math.MP math-ph'
+    record=arXivRecord(meta)
+    assert record.categories==[ CATEGORIES['math.MP'], CATEGORIES['math-ph']]
+  
+    #adding subsumed only goes one way
+    meta.abs_categories='solv-int'
+    record=arXivRecord(meta)
+    assert record.categories==[ CATEGORIES['nlin.SI']]
+    meta.abs_categories='nlin.SI'
+    record=arXivRecord(meta)
+    assert record.categories==[ CATEGORIES['nlin.SI']]
+    meta.abs_categories='solv-int nlin.SI'
+    record=arXivRecord(meta)
+    assert record.categories==[ CATEGORIES['nlin.SI']]
+
+    #a whole bunch together
+    meta.abs_categories='solv-int hep-lat math.MP math-ph'
+    record=arXivRecord(meta)
+    assert record.categories==[ CATEGORIES['nlin.SI'], CATEGORIES['hep-lat'], CATEGORIES['math.MP'], CATEGORIES['math-ph']]

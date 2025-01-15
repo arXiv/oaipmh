@@ -68,8 +68,3 @@ def schema_arXiv() -> Response:
 def schema_arXivOld() -> Response:
     file_path = "templates/schema/arXivOld.xsd" 
     return __send_schema(file_path)
-
-@blueprint.route('/favicon.ico')
-def favicon():
-    #TODO
-    return '', 204
