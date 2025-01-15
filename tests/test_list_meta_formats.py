@@ -70,3 +70,13 @@ def test_extra_params(test_client):
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" in text
     assert f"Only {OAIParams.ID} parameter allowed" in text
+
+def test_nonexistant_paper(test_client):
+    params = {OAIParams.VERB: OAIVerbs.LIST_META_FORMATS, OAIParams.ID : "oai:arXiv.org:1001.9999"}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "<error code="  in text
+    assert "<error code=" in text
+    assert 'No paper with that ID.' in text
+    assert '<request verb="ListMetadataFormats" identifier="oai:arXiv.org:1001.9999">' in text

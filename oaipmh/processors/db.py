@@ -144,3 +144,8 @@ def process_requested_subject(subject: Union[Group, Archive, Category])-> Tuple[
                 process_cat_name(category.alt_name) if category.alt_name else None 
 
     return archs, cats
+
+def check_paper_existence(paper_id: Identifier) ->bool:
+    #true if paper exists, false otherwise
+    result=Session.query(Metadata.document_id).filter(Metadata.paper_id==paper_id.id).all()
+    return bool(result)

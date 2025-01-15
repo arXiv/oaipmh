@@ -4,10 +4,11 @@ from datetime import timezone, datetime
 from flask import render_template
 
 from oaipmh.data import oai_config
-from oaipmh.data.oai_errors import OAIBadArgument
+from oaipmh.data.oai_errors import OAIBadArgument, OAINonexistentID
 from oaipmh.data.oai_properties import OAIParams, OAIVerbs
 from oaipmh.serializers.output_formats import Response
 from oaipmh.processors.create_set_list import display_set_structure
+from oaipmh.processors.db import check_paper_existence
 from oaipmh.requests.param_processing import process_identifier
 
 def identify(params: Dict[str, str]) -> Response:
@@ -40,12 +41,14 @@ def list_metadata_formats(params: Dict[str, str]) -> Response:
         identifier_str=params[OAIParams.ID]
         arxiv_id=process_identifier(identifier_str)
         query_data[OAIParams.ID]=identifier_str
-        #TODO do i have to check this identifier actually exists?
-        #all formats are available for all items so we dont actually care about looking it up
-    else: #give formats repository supports
+        if not check_paper_existence(arxiv_id):#no formats available for a non existant paper
+            raise OAINonexistentID(f"No paper with that ID.", query_data)
+     
+    else: 
         if given_params != {OAIParams.VERB}:
             raise OAIBadArgument(f"Only allowed parameters are {', '.join(str(param) for param in expected_params)}")
     
+    #give formats repository supports
     response=render_template("metaformats.xml", 
         response_date=datetime.now(timezone.utc),
         query_params=query_data,
