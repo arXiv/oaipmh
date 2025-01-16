@@ -17,7 +17,7 @@ def identify(params: Dict[str, str]) -> Response:
     if set(params.keys()) != {OAIParams.VERB}:
         raise OAIBadArgument(f"No other parameters allowed for {OAIVerbs.IDENTIFY}")
     
-    response=render_template("identify.xml",  #TODO look into links and url in logo description, make sure there is no conflict
+    response=render_template("identify.xml",  
         response_date=datetime.now(timezone.utc),
         query_params=query_data,
         config_data=oai_config
