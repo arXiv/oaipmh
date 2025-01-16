@@ -468,10 +468,21 @@ def test_resumption_sequencing1(test_client):
         text=response.get_data(as_text=True)
         assert "resumptionToken" in text
         assert text.count("<header>")==limit
+        assert '<identifier>oai:arXiv.org:0704.0248</identifier>' in text
+        assert '<identifier>oai:arXiv.org:cs/0001024</identifier>' in text
+        token=__get_res_token(text)
+        assert token[-1] == '0' #could change with different token encoding scheme
+
+        params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.RES_TOKEN: token}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "resumptionToken" in text
+        assert text.count("<header>")==limit
         assert '<identifier>oai:arXiv.org:chao-dyn/9510015</identifier>' in text
         assert '<identifier>oai:arXiv.org:hep-th/9901002</identifier>' in text
         token=__get_res_token(text)
-        assert token[-1] == '0' #could change with different token ecnoding scheme
+        assert token[-1] == '0' #could change with different token encoding scheme
 
         params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.RES_TOKEN: token}
         response = test_client.get("/oai", query_string=params)
@@ -482,7 +493,7 @@ def test_resumption_sequencing1(test_client):
         assert '<identifier>oai:arXiv.org:0704.0046</identifier>' in text
         assert '<identifier>oai:arXiv.org:1008.3222</identifier>' in text
         token=__get_res_token(text)
-        assert token[-1] == '0' #could change with different token ecnoding scheme
+        assert token[-1] == '0' #could change with different token encoding scheme
 
         """a note on the following results: 
         if you generate a large list of identifiers, the upcoming expected papers will NOT be the next two in the list. 
@@ -514,7 +525,7 @@ def test_resumption_sequencing1(test_client):
         assert '<identifier>oai:arXiv.org:1001.2600</identifier>' in text
         assert '<identifier>oai:arXiv.org:1102.0304</identifier>' not in text #has the same modtime as 1001.2600 but later in paper_id ordering
         token=__get_res_token(text)
-        assert token[-1] == '4' #could change with different token ecnoding scheme
+        assert token[-1] == '4' #could change with different token encoding scheme
      
 def test_resumption_sequencing2(test_client):
     #more testing a sequence doesnt miss things at different breakpoints
@@ -526,11 +537,23 @@ def test_resumption_sequencing2(test_client):
         text=response.get_data(as_text=True)
         assert "resumptionToken" in text
         assert text.count("<header>")==limit
+        assert '<identifier>oai:arXiv.org:0704.0248</identifier>' in text
+        assert '<identifier>oai:arXiv.org:cs/0001024</identifier>' in text
         assert '<identifier>oai:arXiv.org:chao-dyn/9510015</identifier>' in text
+        token=__get_res_token(text)
+        assert token[-1] == '0' #could change with different token encoding scheme
+
+        params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.RES_TOKEN: token}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "resumptionToken" in text
+        assert text.count("<header>")==limit     
         assert '<identifier>oai:arXiv.org:hep-th/9901002</identifier>' in text
         assert '<identifier>oai:arXiv.org:0704.0046</identifier>' in text
+        assert '<identifier>oai:arXiv.org:1008.3222</identifier>' in text
         token=__get_res_token(text)
-        assert token[-1] == '0' #could change with different token ecnoding scheme
+        assert token[-1] == '0' #could change with different token encoding scheme
 
         params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.RES_TOKEN: token}
         response = test_client.get("/oai", query_string=params)
@@ -540,9 +563,9 @@ def test_resumption_sequencing2(test_client):
         assert text.count("<header>")==limit
         assert '<identifier>oai:arXiv.org:1102.0299</identifier>' in text
         assert '<identifier>oai:arXiv.org:1102.0285</identifier>' in text
-        assert '<identifier>oai:arXiv.org:1008.3222</identifier>' in text
+        assert '<identifier>oai:arXiv.org:0901.0022</identifier>' in text
         token=__get_res_token(text)
-        assert token[-1] == '2' #could change with different token ecnoding scheme
+        assert token[-1] == '3' #could change with different token encoding scheme
 
         params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.RES_TOKEN: token}
         response = test_client.get("/oai", query_string=params)
@@ -550,11 +573,11 @@ def test_resumption_sequencing2(test_client):
         text=response.get_data(as_text=True)
         assert "resumptionToken" in text
         assert text.count("<header>")==limit
-        assert '<identifier>oai:arXiv.org:0901.0022</identifier>' in text
+        assert '<identifier>oai:arXiv.org:1003.0904</identifier>' in text
         assert '<identifier>oai:arXiv.org:1001.2600</identifier>' in text
         assert '<identifier>oai:arXiv.org:1102.0304</identifier>' in text
         token=__get_res_token(text)
-        assert token[-1] == '5' #could change with different token ecnoding scheme
+        assert token[-1] == '6' #could change with different token encoding scheme
 
 def test_resumption_sequencing_records(test_client):
     #makes sure a sequence doesnt miss anything
@@ -566,10 +589,21 @@ def test_resumption_sequencing_records(test_client):
         text=response.get_data(as_text=True)
         assert "resumptionToken" in text
         assert text.count("<header>")==limit
+        assert '<identifier>oai:arXiv.org:0704.0248</identifier>' in text
+        assert '<identifier>oai:arXiv.org:cs/0001024</identifier>' in text
+        token=__get_res_token(text)
+        assert token[-1] == '0' #could change with different token encoding scheme
+
+        params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.RES_TOKEN: token}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "resumptionToken" in text
+        assert text.count("<header>")==limit
         assert '<identifier>oai:arXiv.org:chao-dyn/9510015</identifier>' in text
         assert '<identifier>oai:arXiv.org:hep-th/9901002</identifier>' in text
         token=__get_res_token(text)
-        assert token[-1] == '0' #could change with different token ecnoding scheme
+        assert token[-1] == '0' #could change with different token encoding scheme
 
         params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.RES_TOKEN: token}
         response = test_client.get("/oai", query_string=params)
@@ -580,7 +614,7 @@ def test_resumption_sequencing_records(test_client):
         assert '<identifier>oai:arXiv.org:0704.0046</identifier>' in text
         assert '<identifier>oai:arXiv.org:1008.3222</identifier>' in text
         token=__get_res_token(text)
-        assert token[-1] == '0' #could change with different token ecnoding scheme
+        assert token[-1] == '0' #could change with different token encoding scheme
 
         params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.RES_TOKEN: token}
         response = test_client.get("/oai", query_string=params)
@@ -604,7 +638,7 @@ def test_resumption_sequencing_records(test_client):
         assert '<identifier>oai:arXiv.org:1001.2600</identifier>' in text
         assert '<identifier>oai:arXiv.org:1102.0304</identifier>' not in text #has the same modtime as 1001.2600 but later in paper_id ordering
         token=__get_res_token(text)
-        assert token[-1] == '4' #could change with different token ecnoding scheme
+        assert token[-1] == '4' #could change with different token encoding scheme
   
 
 #formatting
