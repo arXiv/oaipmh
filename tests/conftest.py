@@ -90,7 +90,7 @@ def metadata_object2():
 def metadata_object3():
     return Metadata(
         metadata_id=1,
-        document_id=1,
+        document_id=2,
         paper_id="1234.56790",
         created=datetime(2024,2,1,10,3,6),
         updated=datetime(2024,3,7,15,7,8),

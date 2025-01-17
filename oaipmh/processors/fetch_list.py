@@ -103,7 +103,7 @@ def find_last_result(data: List[Metadata])->Tuple[str, datetime]:
     return create_oai_id(latest_paper), last_date
 
 def create_records(data: List[Metadata], just_ids:bool, format:MetadataFormat)->List[Union[Header, Record]]:
-    """turns data from the database into header or Record objects and sorts them"""
+    """turns data from the database into header or Record objects"""
     items=[]
     if just_ids:
         for item in data:
