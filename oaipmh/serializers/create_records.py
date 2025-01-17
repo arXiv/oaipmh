@@ -15,7 +15,7 @@ class Header:
         self.id=create_oai_id(id)
         self.date=date
         self.sets=[]
-        for cat in cats: #TODO if alias not in string, set list misses it
+        for cat in cats: 
             self.sets.append(make_set_str(cat))
 
     def __eq__(self, other: object) -> bool:

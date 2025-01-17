@@ -1,9 +1,8 @@
 from datetime import datetime, timezone
 from oaipmh.data.oai_properties import MetadataFormat
 
-#TODO test/ determine limits, should they be changed for different data formats
-RECORDS_LIMIT=2000
-IDENTIFIERS_LIMIT=5000 
+RECORDS_LIMIT=3000
+IDENTIFIERS_LIMIT=8000 
 
 SUPPORTED_METADATA_FORMATS={
     "oai_dc":MetadataFormat(
@@ -36,7 +35,7 @@ SUPPORTED_METADATA_FORMATS={
 REPOSITORY_NAME='arXiv'
 BASE_URL='https://arxiv.org/oai'
 PROTOCOL_VERSION='2.0'
-EARLIEST_DATE=datetime(2007, 5, 23, 0, 0, tzinfo=timezone.utc) #TODO change?
+EARLIEST_DATE=datetime(2005, 9, 16, 0, 0, tzinfo=timezone.utc) #earliest modtime of a current version of a paper, there are ~90K with this value
 DELETED_RECORD='persistent'
 GRANULARITY='YYYY-MM-DD'
 ADMIN_EMAIL='help@arxiv.org'
