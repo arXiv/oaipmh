@@ -5,7 +5,7 @@ from arxiv.taxonomy.definitions import GROUPS, ARCHIVES, CATEGORIES
 from oaipmh.data.oai_config import SUPPORTED_METADATA_FORMATS
 from oaipmh.processors.db import process_requested_subject, get_list_data
 from oaipmh.processors.fetch_list import create_records
-from oaipmh.serializers.create_records import Header, arXivOldRecord
+from oaipmh.serializers.create_records import Header, arXivOldRecord, arXivRecord, dcRecord, arXivRawRecord
 
 #data fetching
 def test_no_data():
@@ -84,11 +84,51 @@ def test_data_fetch_selective_set_alias():
     assert all(isinstance(item, arXivOldRecord) for item in objects)
     assert len(objects) <=6 
     assert any(obj.header.id == "oai:arXiv.org:1008.3222" for obj in objects) #this paper only has cs.SY in its category string
-    #assert any(obj.header.id == "oai:arXiv.org:1008.3222" and "eess:eess:SY" in obj.header.sets for obj in objects) #TODO this should pass
+    assert any(obj.header.id == "oai:arXiv.org:1008.3222" and "eess:eess:SY" in obj.header.sets for obj in objects) #alias also present
     assert not any(obj.header.id == "oai:arXiv.org:0704.0046" for obj in objects)
 
-#TODO selective amounts of data being returned
-#TODO tests for create records
+
+def test_create_records(metadata_object1, metadata_object2, metadata_object3):
+    #make headers
+    result=create_records([metadata_object3, metadata_object2], True, SUPPORTED_METADATA_FORMATS['arXiv'])
+    h2=arXivRecord(metadata_object2).header
+    h3=arXivRecord(metadata_object3).header
+    expected=[h3, h2]
+    assert result== expected
+    #type doesnt matter
+    result=create_records([metadata_object3, metadata_object2], True, SUPPORTED_METADATA_FORMATS['oai_dc'])
+    assert result== expected
+    result=create_records([metadata_object3, metadata_object2], True, SUPPORTED_METADATA_FORMATS['arXivRaw'])
+    assert result== expected
+    result=create_records([metadata_object3, metadata_object2], True, SUPPORTED_METADATA_FORMATS['arXivOld'])
+    assert result== expected
+
+    #make single version records
+    result=create_records([metadata_object2,metadata_object3 ], False, SUPPORTED_METADATA_FORMATS['arXiv'])
+    r2=arXivRecord(metadata_object2)
+    r3=arXivRecord(metadata_object3)
+    expected=[r2,r3]
+    assert result==expected
+
+    result=create_records([metadata_object2,metadata_object3 ], False, SUPPORTED_METADATA_FORMATS['arXivOld'])
+    r2=arXivOldRecord(metadata_object2)
+    r3=arXivOldRecord(metadata_object3)
+    expected=[r2,r3]
+    assert result==expected
+
+    #records with version history
+    result=create_records([metadata_object1, metadata_object2, metadata_object3 ], False, SUPPORTED_METADATA_FORMATS['arXivRaw'])
+    r2=arXivRawRecord([metadata_object2, metadata_object1])
+    r3=arXivRawRecord([metadata_object3])
+    expected=[r2,r3]
+    assert result==expected
+
+    result=create_records([metadata_object2, metadata_object1, metadata_object3 ], False, SUPPORTED_METADATA_FORMATS['oai_dc'])
+    r2=dcRecord([metadata_object2, metadata_object1])
+    r3=dcRecord([metadata_object3])
+    expected=[r2,r3]
+    assert result==expected
+
 
 #category processing
 
