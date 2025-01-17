@@ -147,5 +147,5 @@ def process_requested_subject(subject: Union[Group, Archive, Category])-> Tuple[
 
 def check_paper_existence(paper_id: Identifier) ->bool:
     #true if paper exists, false otherwise
-    result=Session.query(Metadata.document_id).filter(Metadata.paper_id==paper_id.id).all()
+    result=Session.query(Metadata.document_id).filter(Metadata.paper_id==paper_id.id).first()
     return bool(result)
