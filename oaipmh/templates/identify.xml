@@ -25,15 +25,15 @@
             </content>
             <metadataPolicy>
                 <text>Metadata harvesting permitted through OAI interface</text>
-                <URL>http://arxiv.org/help/oa/metadataPolicy</URL>
+                <URL>https://info.arxiv.org/help/oa/metadataPolicy.html</URL>
             </metadataPolicy>
             <dataPolicy>
                 <text>Full-content harvesting not permitted (except by special arrangement)</text>
-                <URL>http://arxiv.org/help/oa/dataPolicy</URL>
+                <URL>https://info.arxiv.org/help/oa/dataPolicy.html</URL>
             </dataPolicy>
             <submissionPolicy>
                 <text>Author self-submission preferred, submissions screened for appropriateness.</text>
-                <URL>http://arxiv.org/help/submit</URL>
+                <URL>https://info.arxiv.org/help/submit/index.html</URL>
             </submissionPolicy>
         </eprints>
     </description>

@@ -41,5 +41,5 @@ def test_contents(test_client):
     assert "<granularity>YYYY-MM-DD</granularity>" in text
     assert "<description>" in text
     assert "<text>Full-content harvesting not permitted (except by special arrangement)</text>" in text
-    assert "<URL>http://arxiv.org/help/oa/metadataPolicy</URL>" in text
+    assert "<URL>https://info.arxiv.org/help/oa/metadataPolicy.html</URL>" in text
 
