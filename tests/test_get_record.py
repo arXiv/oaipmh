@@ -32,6 +32,13 @@ def test_bad_meta_format(test_client):
     assert "<error code='cannotDisseminateFormat'>" in text
     assert "Did not recognize requested format" in text
 
+def test_special_char_encoding(test_client):
+    response = test_client.get("/oai?verb=GetRecord&identifier=oai%3AarXiv.org%3Acs%2F0001024&metadataPrefix=oai_dc")
+    assert response.status_code == 200
+    assert "<error code='badArgument'>" not in response.text
+    assert "<identifier>oai:arXiv.org:cs/0001024</identifier>" in response.text
+    assert "A Parallel Algorithm for Dilated Contour Extraction from Bilevel Images" in response.text
+
 def test_bad_id(test_client):
 
     params = {OAIParams.VERB: OAIVerbs.GET_RECORD, OAIParams.ID: "arXiv.org:2307.10651",  OAIParams.META_PREFIX: "oai_dc"}
