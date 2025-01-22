@@ -19,7 +19,7 @@ def test_good_params(test_client):
     params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.META_PREFIX: "oai_dc"}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
-    assert response.headers["Content-Type"] == "application/xml"
+    assert response.headers["Content-Type"] == "text/xml"
     assert response.headers["Surrogate-Control"]==('max-age=345600')
     assert response.headers["Surrogate-Key"] == "announce oai" 
     text=response.get_data(as_text=True)
@@ -27,7 +27,7 @@ def test_good_params(test_client):
 
     response = test_client.post("/oai", data=params)
     assert response.status_code == 200 
-    assert response.headers["Content-Type"] == "application/xml"
+    assert response.headers["Content-Type"] == "text/xml"
     assert response.headers["Surrogate-Control"]==('max-age=345600')
     assert response.headers["Surrogate-Key"] == "announce oai"
     text=response.get_data(as_text=True)
@@ -36,7 +36,7 @@ def test_good_params(test_client):
     #good maximal params
     params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.FROM: "2009-01-05", OAIParams.UNTIL:"2020-02-05", OAIParams.SET: "math"}
     response = test_client.get("/oai", query_string=params)
-    assert response.headers["Content-Type"] == "application/xml"
+    assert response.headers["Content-Type"] == "text/xml"
     assert response.headers["Surrogate-Control"]==('max-age=345600')
     assert response.headers["Surrogate-Key"] == "announce oai"
     assert response.status_code == 200 
@@ -44,7 +44,7 @@ def test_good_params(test_client):
     assert "<error code=" not in text
 
     response = test_client.post("/oai", data=params)
-    assert response.headers["Content-Type"] == "application/xml"
+    assert response.headers["Content-Type"] == "text/xml"
     assert response.headers["Surrogate-Control"]==('max-age=345600')
     assert response.headers["Surrogate-Key"] == "announce oai"
     assert response.status_code == 200 
@@ -54,7 +54,7 @@ def test_good_params(test_client):
     #good partial params
     params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.UNTIL:"2020-02-05", OAIParams.SET: "math"}
     response = test_client.get("/oai", query_string=params)
-    assert response.headers["Content-Type"] == "application/xml"
+    assert response.headers["Content-Type"] == "text/xml"
     assert response.headers["Surrogate-Control"]==('max-age=345600')
     assert response.headers["Surrogate-Key"] == "announce oai"
     assert response.status_code == 200 
@@ -62,7 +62,7 @@ def test_good_params(test_client):
     assert "<error code=" not in text
 
     response = test_client.post("/oai", data=params)
-    assert response.headers["Content-Type"] == "application/xml"
+    assert response.headers["Content-Type"] == "text/xml"
     assert response.headers["Surrogate-Control"]==('max-age=345600')
     assert response.headers["Surrogate-Key"] == "announce oai"
     assert response.status_code == 200 
@@ -298,7 +298,7 @@ def test_token_params(test_client):
     params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.RES_TOKEN: token.token_str}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
-    assert response.headers["Content-Type"] == "application/xml"
+    assert response.headers["Content-Type"] == "text/xml"
     cache_timer=response.headers["Surrogate-Control"]
     assert cache_timer[:8]=='max-age='
     assert int(cache_timer[8:]) <= 3600*24

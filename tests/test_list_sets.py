@@ -21,7 +21,7 @@ def test_good_params(test_client):
     params = {OAIParams.VERB: OAIVerbs.LIST_SETS}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200
-    assert response.headers["Content-Type"] == "application/xml"
+    assert response.headers["Content-Type"] == "text/xml"
     assert response.headers["Surrogate-Control"] == "max-age=31536000"
     assert response.headers["Surrogate-Key"] == "oai" 
     text=response.get_data(as_text=True)
@@ -29,7 +29,7 @@ def test_good_params(test_client):
 
     response = test_client.post("/oai", data=params)
     assert response.status_code == 200 
-    assert response.headers["Content-Type"] == "application/xml"
+    assert response.headers["Content-Type"] == "text/xml"
     assert response.headers["Surrogate-Control"] == "max-age=31536000"
     assert response.headers["Surrogate-Key"] == "oai"
     text=response.get_data(as_text=True)

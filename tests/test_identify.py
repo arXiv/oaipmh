@@ -30,7 +30,7 @@ def test_contents(test_client):
     params = {OAIParams.VERB: OAIVerbs.IDENTIFY}
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
-    assert response.headers["Content-Type"] == "application/xml"
+    assert response.headers["Content-Type"] == "text/xml"
     assert response.headers["Surrogate-Control"] == "max-age=31536000"
     assert response.headers["Surrogate-Key"] == "oai"
 

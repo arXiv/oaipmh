@@ -42,7 +42,7 @@ def oai() -> Response:
         case _:
             raise OAIBadVerb(f"Invalid verb provided") #dont keep invalid verb
         
-    headers["Content-Type"]="application/xml"
+    headers["Content-Type"]="text/xml"
     headers=add_surrogate_key(headers,["oai"])
 
     return response, code, headers
