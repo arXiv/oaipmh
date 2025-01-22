@@ -641,6 +641,31 @@ def test_resumption_sequencing_records(test_client):
         assert token[-1] == '4' #could change with different token encoding scheme
   
 
+def test_final_resToken(test_client):
+    params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.SET: "math"}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200 
+    text=response.get_data(as_text=True)
+    assert "resumptionToken" not in text
+
+    limit=3
+    with patch('oaipmh.processors.fetch_list.IDENTIFIERS_LIMIT', limit):
+        params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.META_PREFIX: "oai_dc", OAIParams.SET: "math"}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "<resumptionToken expires=" in text
+        token=__get_res_token(text)
+        assert len(token) >1
+
+        params = {OAIParams.VERB: OAIVerbs.LIST_IDS, OAIParams.RES_TOKEN: token}
+        response = test_client.get("/oai", query_string=params)
+        assert response.status_code == 200 
+        text=response.get_data(as_text=True)
+        assert "<resumptionToken/>" in text
+        token=__get_res_token(text)
+        assert token == '' #final token should be empty 
+
 #formatting
 def test_records_from_params(test_client):
     params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.META_PREFIX: "arXiv", OAIParams.FROM: "2009-01-05", OAIParams.UNTIL:"2020-02-05", OAIParams.SET: "math"}
