@@ -34,43 +34,44 @@ def get_list_data(just_ids:bool, start_date :datetime, end_date:datetime, all_ve
     start_timestamp=start_date.timestamp()
     end_timestamp=end_date.timestamp()
 
-    #all papers that have been updated within the time frame
-    doc_ids=( 
-        Session.query(Metadata.document_id)
-        .filter(
-            Metadata.modtime >= start_timestamp,  
-            Metadata.modtime <= end_timestamp,  
-            Metadata.is_current == 1,  
-        )
-        .subquery()
-    )
-
-    #filter for certain categories
     if rq_set:
         archives, cats=process_requested_subject(rq_set)
         aic = aliased(t_arXiv_in_category)
         cat_conditions = [and_(aic.c.archive == arch_part, aic.c.subject_class == subj_part) for arch_part, subj_part in cats]
-        doc_ids=(Session.query(doc_ids.c.document_id)
-            .join(aic, doc_ids.c.document_id == aic.c.document_id)
+
+        selected_doc_ids=(Session.query(Metadata.document_id)
+            .join(aic, Metadata.document_id == aic.c.document_id)
+            .filter(
+                Metadata.modtime >= start_timestamp,  
+                Metadata.modtime <= end_timestamp,  
+                Metadata.is_current == 1,  
+            )
             .filter(
                 or_(
                     aic.c.archive.in_(archives),
                     or_(*cat_conditions),
                 )
             )
+            .distinct()
+            .order_by(Metadata.modtime, Metadata.paper_id)
+            .offset(skip)
+            .limit(limit+1) #one extra to see if resumption token needed
             .subquery()
         )   
-    
-    #select exact group of documents that will be reported on
-    selected_doc_ids=(
-        Session.query(Metadata.document_id)
-        .filter(Metadata.document_id.in_(doc_ids.select()))
-        .filter(Metadata.is_current == 1)
-        .order_by(Metadata.modtime, Metadata.paper_id)
-        .offset(skip)
-        .limit(limit+1) #one extra to see if resumption token needed
-        .subquery()
-    )
+
+    else: #no specific category requested
+        selected_doc_ids=( 
+            Session.query(Metadata.document_id)
+            .filter(
+                Metadata.modtime >= start_timestamp,  
+                Metadata.modtime <= end_timestamp,  
+                Metadata.is_current == 1,  
+            )
+            .order_by(Metadata.modtime, Metadata.paper_id)
+            .offset(skip)
+            .limit(limit+1) #one extra to see if resumption token needed
+            .subquery()
+        )
 
     #fetch the metadata
     if just_ids: #only need the data for the header portion
