@@ -35,8 +35,12 @@ def fetch_list(just_ids:bool, start_date :datetime, end_date:datetime, meta_type
     objects=create_records(data, just_ids, meta_type)
     objects.sort()
 
-    #create resumption token if more results than limit
+    #resumption tokens
     res_token=None
+    if OAIParams.RES_TOKEN in query_data: #need to have either a new resumption token or an empty one
+        res_token=ResToken({},0, True)
+
+    #create resumption token if more results than limit
     if len(objects)>limit: 
         last_date=last_datetime.date()
         first_date= objects[0].date.date() if just_ids else objects[0].header.date.date()

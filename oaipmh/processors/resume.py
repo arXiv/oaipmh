@@ -6,11 +6,20 @@ from oaipmh.data.oai_errors import OAIBadResumptionToken
 from oaipmh.data.oai_properties import OAIParams
 
 class ResToken:
-    def __init__(self, params: Dict[OAIParams, str], start_val: int):
-        self.params = params
-        self.start_val = start_val
-        self.token_str = self.to_token()
-        self.expires = (datetime.now(timezone.utc) + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    def __init__(self, params: Dict[OAIParams, str], start_val: int, empty=False):
+        if empty:
+            #to indicate the end of a resumption token sequence
+            self.params = {}
+            self.start_val = 0
+            self.token_str = ''
+            self.expires = (datetime.now(timezone.utc) + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+            self.empty=True
+        else:
+            self.params = params
+            self.start_val = start_val
+            self.token_str = self.to_token()
+            self.expires = (datetime.now(timezone.utc) + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+            self.empty=False
 
     def to_token(self) -> str: 
         params = self.params.copy()

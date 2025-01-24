@@ -45,7 +45,7 @@ def create_web_app(**kwargs) -> Flask: # type: ignore
         
         now = datetime.now(timezone.utc)
         seconds_until_midnight = (24 * 60 * 60) - (now.hour * 3600 + now.minute * 60 + now.second)
-        headers={"Content-Type":"application/xml",
+        headers={"Content-Type":"text/xml",
                 'Surrogate-Control': f'max-age={int(seconds_until_midnight)}'
         }
         headers=add_surrogate_key(headers,["oai"])
