@@ -1,0 +1,26 @@
+{% extends "base.xml" %}
+
+{% block request_element %}
+    {{ macros.request_element(query_data) }}
+{% endblock %}
+
+{% block interior_xml %}
+    <ListSets>
+        {% for item in groups.values() %}
+            {{ set_item(item, to_set) }}
+        {% endfor %}
+        {% for item in archives.values() %}
+            {{ set_item(item, to_set) }}
+        {% endfor %}
+        {% for item in categories.values() %}
+            {{ set_item(item, to_set) }}
+        {% endfor %}
+    </ListSets>
+{% endblock %}
+
+{% macro set_item(item, to_set) %}
+    <set>
+        <setSpec>{{to_set(item)}}</setSpec>
+        <setName>{{item.full_name}}</setName>
+    </set>
+{% endmacro %}
