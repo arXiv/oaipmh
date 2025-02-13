@@ -131,11 +131,11 @@
         {% if record.current_meta.report_num %}
             <report-no>{{ record.current_meta.report_num }}</report-no>
         {% endif %}
-        {% if record.current_meta.msc_class %}
-            <msc-class>{{ record.current_meta.msc_class }}</msc-class>
-        {% endif %}
         {% if record.current_meta.acm_class %}
             <acm-class>{{ record.current_meta.msc_class }}</acm-class>
+        {% endif %}
+        {% if record.current_meta.msc_class %}
+            <msc-class>{{ record.current_meta.msc_class }}</msc-class>
         {% endif %}
         {% if record.current_meta.journal_ref %}
             <journal-ref>{{ record.current_meta.journal_ref }}</journal-ref>
@@ -179,11 +179,11 @@
         {% if record.current_meta.doi %}
             <doi>{{record.current_meta.doi}}</doi>
         {% endif %}
-        {% if record.current_meta.license %}
-            <license>{{record.current_meta.license}}</license>
-        {% endif %}
         {% if record.current_meta.abstract %}
             <abstract>{{record.current_meta.abstract}}</abstract>
+        {% endif %}
+        {% if record.current_meta.license %}
+            <license>{{record.current_meta.license}}</license>
         {% endif %}
     </arXivOld>
 {% endmacro %}

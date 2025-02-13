@@ -654,7 +654,7 @@ def test_final_resToken(test_client):
         response = test_client.get("/oai", query_string=params)
         assert response.status_code == 200 
         text=response.get_data(as_text=True)
-        assert "<resumptionToken expires=" in text
+        assert "<resumptionToken expirationDate=" in text
         token=__get_res_token(text)
         assert len(token) >1
 
