@@ -9,7 +9,7 @@ def test_good_params(test_client):
     assert "<error code=" not in text
     assert '<metadataPrefix>arXiv</metadataPrefix>' in text
     assert '<metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace>' in text
-    assert '<schema>http://arxiv.org/OAI/arXivRaw.xsd</schema>' in text
+    assert '<schema>https://oaipmh.arxiv.org/OAI/arXivRaw.xsd</schema>' in text
     assert '<ListMetadataFormats>' in text
     assert '<request verb="ListMetadataFormats">' in text
 
@@ -30,7 +30,7 @@ def test_good_params(test_client):
     assert "<error code=" not in text
     assert '<metadataPrefix>arXiv</metadataPrefix>' in text
     assert '<metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace>' in text
-    assert '<schema>http://arxiv.org/OAI/arXivRaw.xsd</schema>' in text
+    assert '<schema>https://oaipmh.arxiv.org/OAI/arXivRaw.xsd</schema>' in text
     assert '<ListMetadataFormats>' in text
     assert '<request verb="ListMetadataFormats" identifier="oai:arXiv.org:1001.3172">' in text
 
