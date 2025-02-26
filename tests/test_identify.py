@@ -36,7 +36,7 @@ def test_contents(test_client):
 
     text=response.get_data(as_text=True)
     assert "<repositoryName>arXiv</repositoryName>" in text
-    assert "<baseURL>https://arxiv.org/oai</baseURL>" in text
+    assert "<baseURL>https://oaipmh.arxiv.org/oai</baseURL>" in text
     assert "<earliestDatestamp>2005-09-16</earliestDatestamp>" in text
     assert "<granularity>YYYY-MM-DD</granularity>" in text
     assert "<description>" in text
