@@ -53,7 +53,7 @@
 {% endmacro%}
 
 {% macro arXiv_record(record) %}
-    <arXiv xmlns="http://arxiv.org/OAI/arXiv/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://arxiv.org/OAI/arXiv/ http://arxiv.org/OAI/arXiv.xsd">
+    <arXiv xmlns="http://arxiv.org/OAI/arXiv/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://arxiv.org/OAI/arXiv/ http://oaipmh.arxiv.org/OAI/arXiv.xsd">
         <id>{{record.current_meta.paper_id}}</id>
         <created>{{record.current_meta.created.strftime('%Y-%m-%d')}}</created>
         {% if record.current_meta.updated %}
@@ -107,7 +107,7 @@
 {% endmacro%}
 
 {% macro arXivRaw_record(record) %}
-    <arXivRaw xmlns="http://arxiv.org/OAI/arXivRaw/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://arxiv.org/OAI/arXivRaw/ http://arxiv.org/OAI/arXivRaw.xsd">
+    <arXivRaw xmlns="http://arxiv.org/OAI/arXivRaw/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://arxiv.org/OAI/arXivRaw/ http://oaipmh.arxiv.org/OAI/arXivRaw.xsd">
         <id>{{record.current_meta.paper_id}}</id>
         <submitter>{{record.current_meta.submitter_name}}</submitter>
         {% for version in record.versions %}
@@ -153,7 +153,7 @@
 {% endmacro%}
 
 {% macro arXivOld_record(record) %}
-    <arXivOld xmlns="http://arxiv.org/OAI/arXivOld/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://arxiv.org/OAI/arXivOld/ http://arxiv.org/OAI/arXivOld.xsd">
+    <arXivOld xmlns="http://arxiv.org/OAI/arXivOld/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://arxiv.org/OAI/arXivOld/ http://oaipmh.arxiv.org/OAI/arXivOld.xsd">
         <id>{{record.current_meta.paper_id}}</id>
         <title>{{record.current_meta.title}}</title>
         <authors>{{record.current_meta.authors}}</authors>

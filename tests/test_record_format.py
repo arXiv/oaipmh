@@ -37,7 +37,7 @@ def test_arXivOld_format(test_client):
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
-    assert '<arXivOld xmlns="http://arxiv.org/OAI/arXivOld/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://arxiv.org/OAI/arXivOld/ http://arxiv.org/OAI/arXivOld.xsd">' in text
+    assert '<arXivOld xmlns="http://arxiv.org/OAI/arXivOld/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://arxiv.org/OAI/arXivOld/ http://oaipmh.arxiv.org/OAI/arXivOld.xsd">' in text
     assert '<id>0806.4129</id>' in text
     assert '<title>Gauge Fixing in the Maxwell Like Gravitational Theory in Minkowski Spacetime and in the Equivalent Lorentzian Spacetime</title>' in text
     assert '<authors>Roldao da Rocha, Waldyr A. Rodrigues Jr</authors>' in text
@@ -55,7 +55,7 @@ def test_arXiv_format(test_client):
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
-    assert '<arXiv xmlns="http://arxiv.org/OAI/arXiv/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://arxiv.org/OAI/arXiv/ http://arxiv.org/OAI/arXiv.xsd">' in text
+    assert '<arXiv xmlns="http://arxiv.org/OAI/arXiv/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://arxiv.org/OAI/arXiv/ http://oaipmh.arxiv.org/OAI/arXiv.xsd">' in text
     assert '<id>0806.4129</id>' in text
     assert '<title>Gauge Fixing in the Maxwell Like Gravitational Theory in Minkowski Spacetime and in the Equivalent Lorentzian Spacetime</title>' in text
     assert '<keyname>da Rocha</keyname>' in text
@@ -75,7 +75,7 @@ def test_arXivRaw_format(test_client):
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
     text=response.get_data(as_text=True)
-    assert '<arXivRaw xmlns="http://arxiv.org/OAI/arXivRaw/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://arxiv.org/OAI/arXivRaw/ http://arxiv.org/OAI/arXivRaw.xsd">' in text
+    assert '<arXivRaw xmlns="http://arxiv.org/OAI/arXivRaw/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://arxiv.org/OAI/arXivRaw/ http://oaipmh.arxiv.org/OAI/arXivRaw.xsd">' in text
     assert '<id>0806.4129</id>' in text
     assert '<title>Gauge Fixing in the Maxwell Like Gravitational Theory in Minkowski Spacetime and in the Equivalent Lorentzian Spacetime</title>' in text
     assert '<authors>Roldao da Rocha, Waldyr A. Rodrigues Jr</authors>' in text
