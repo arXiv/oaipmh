@@ -150,5 +150,36 @@ def empty_metadata_object():
         is_withdrawn=0
     )
 
+@pytest.fixture(scope="session")
+def metadata_with_tex():
+    return Metadata(
+        metadata_id=1,
+        document_id=1,
+        paper_id="1234.56789",
+        created=datetime(2023,1,1,10,3,6),
+        updated=datetime(2023,1,1,15,7,8),
+        submitter_id=42,
+        submitter_name="John Doe",
+        submitter_email="john.doe@example.com",
+        source_size=1024,
+        source_format="pdf",
+        source_flags=None,
+        title="Un th\'eor\`eme sur les chats",
+        authors="Andr\'e Cooper, Jar{\l} W{\l}odarczyk",
+        abs_categories="cs.AI hep-lat",
+        comments="Fake comments",
+        proxy=None,
+        report_num=None,
+        msc_class=None,
+        acm_class=None,
+        journal_ref=None,
+        doi=None,
+        abstract="H\'el\`ene has tex characters in it",
+        license="arXiv License",
+        version=1,
+        modtime=1672585628,
+        is_current=1,
+        is_withdrawn=0
+    )
 
 
