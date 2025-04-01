@@ -119,25 +119,25 @@ def test_alternate_categories(metadata_object2):
 def test_handle_tex(metadata_with_tex):
     #dont convert tex
     record=arXivOldRecord(metadata_with_tex)
-    assert record.current_meta.title=="Un th\'eor\`eme sur les chats"
-    assert record.current_meta.authors=="Andr\'e Cooper, Jar{\l} W{\l}odarczyk"
-    assert record.current_meta.abstract=="H\'el\`ene has tex characters in it"
+    assert record.current_meta.title==r"Un th\'eor\`eme sur les chats"
+    assert record.current_meta.authors==r"Andr\'e Cooper, Jar{\l} W{\l}odarczyk"
+    assert record.current_meta.abstract==r"H\'el\`ene has tex characters in it"
 
     record= arXivRawRecord([metadata_with_tex])
-    assert record.current_meta.title=="Un th\'eor\`eme sur les chats"
-    assert record.current_meta.authors=="Andr\'e Cooper, Jar{\l} W{\l}odarczyk"
-    assert record.current_meta.abstract=="H\'el\`ene has tex characters in it"
+    assert record.current_meta.title==r"Un th\'eor\`eme sur les chats"
+    assert record.current_meta.authors==r"Andr\'e Cooper, Jar{\l} W{\l}odarczyk"
+    assert record.current_meta.abstract==r"H\'el\`ene has tex characters in it"
 
 
     #do convert tex
     record=arXivRecord(metadata_with_tex)
-    assert record.current_meta.title=="Un th'eorème sur les chats"
-    assert record.current_meta.authors=="Andr'e Cooper, Jarł Włodarczyk"
-    assert record.current_meta.abstract=="H'elène has tex characters in it"
-    assert record.authors==[['Cooper', "Andr'e", ''], ['Włodarczyk', 'Jarł', '']]
+    assert record.current_meta.title==r"Un théorème sur les chats"
+    assert record.current_meta.authors==r"André Cooper, Jarł Włodarczyk"
+    assert record.current_meta.abstract==r"Hélène has tex characters in it"
+    assert record.authors==[['Cooper', r"André", ''], [r'Włodarczyk', r'Jarł', '']]
 
     record=dcRecord([metadata_with_tex])
-    assert record.current_meta.title=="Un th'eorème sur les chats"
-    assert record.current_meta.authors=="Andr'e Cooper, Jarł Włodarczyk"
-    assert record.current_meta.abstract=="H'elène has tex characters in it"
-    assert record.authors==[['Cooper', "Andr'e", ''], ['Włodarczyk', 'Jarł', '']]
+    assert record.current_meta.title==r"Un théorème sur les chats"
+    assert record.current_meta.authors==r"André Cooper, Jarł Włodarczyk"
+    assert record.current_meta.abstract==r"Hélène has tex characters in it"
+    assert record.authors==[['Cooper', r"André", ''], [r'Włodarczyk', r'Jarł', '']]
