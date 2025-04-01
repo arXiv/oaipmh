@@ -115,3 +115,29 @@ def test_alternate_categories(metadata_object2):
     meta.abs_categories='solv-int hep-lat math.MP math-ph'
     record=arXivRecord(meta)
     assert record.categories==[ CATEGORIES['nlin.SI'], CATEGORIES['hep-lat'], CATEGORIES['math.MP'], CATEGORIES['math-ph']]
+
+def test_handle_tex(metadata_with_tex):
+    #dont convert tex
+    record=arXivOldRecord(metadata_with_tex)
+    assert record.current_meta.title==r"Un th\'eor\`eme sur les chats"
+    assert record.current_meta.authors==r"Andr\'e Cooper, Jar{\l} W{\l}odarczyk"
+    assert record.current_meta.abstract==r"H\'el\`ene has tex characters in it"
+
+    record= arXivRawRecord([metadata_with_tex])
+    assert record.current_meta.title==r"Un th\'eor\`eme sur les chats"
+    assert record.current_meta.authors==r"Andr\'e Cooper, Jar{\l} W{\l}odarczyk"
+    assert record.current_meta.abstract==r"H\'el\`ene has tex characters in it"
+
+
+    #do convert tex
+    record=arXivRecord(metadata_with_tex)
+    assert record.current_meta.title==r"Un théorème sur les chats"
+    assert record.current_meta.authors==r"André Cooper, Jarł Włodarczyk"
+    assert record.current_meta.abstract==r"Hélène has tex characters in it"
+    assert record.authors==[['Cooper', r"André", ''], [r'Włodarczyk', r'Jarł', '']]
+
+    record=dcRecord([metadata_with_tex])
+    assert record.current_meta.title==r"Un théorème sur les chats"
+    assert record.current_meta.authors==r"André Cooper, Jarł Włodarczyk"
+    assert record.current_meta.abstract==r"Hélène has tex characters in it"
+    assert record.authors==[['Cooper', r"André", ''], [r'Włodarczyk', r'Jarł', '']]

@@ -6,6 +6,7 @@ from arxiv.db.models import Metadata
 from arxiv.document.version import VersionEntry
 from arxiv.taxonomy.category import Category
 from arxiv.taxonomy.definitions import CATEGORIES, ARCHIVES_SUBSUMED
+from arxiv.util.tex2utf import tex2utf
 
 from oaipmh.processors.create_set_list import make_set_str
 from oaipmh.requests.param_processing import create_oai_id
@@ -36,7 +37,7 @@ class Header:
             return (self.date.date(), self.id) < (other.date.date(), other.id)
 
 class Record: #base record class
-    def __init__(self, current_meta: Metadata):
+    def __init__(self, current_meta: Metadata, converttex2utf: bool):
         self.categories: List[Category]=[]
         if current_meta.abs_categories:
             for word in current_meta.abs_categories.split():
@@ -54,6 +55,14 @@ class Record: #base record class
         date=datetime.fromtimestamp(current_meta.modtime, tz=timezone.utc)
         self.header = Header(current_meta.paper_id, date, self.categories)
         self.current_meta = current_meta
+        if converttex2utf: #make sure tex is converted in spaces that can have it
+            fields = [
+                "abstract", "title", "authors", "comments", "proxy", "report_num", "journal_ref"
+            ]
+            for field in fields:
+                value = getattr(self.current_meta, field)
+                if value:
+                    setattr(self.current_meta, field, tex2utf(value))
 
     def __lt__(self, other: object) -> bool:
             if not isinstance(other, Record):
@@ -63,7 +72,7 @@ class Record: #base record class
 #specialized record classes for the different supported metadata types
 class arXivRecord(Record):
     def __init__(self, current_meta: Metadata):
-        super().__init__(current_meta)
+        super().__init__(current_meta, True)
         self.authors= parse_author_affil(current_meta.authors)
 
     def  __repr__(self) -> str:
@@ -94,7 +103,7 @@ class arXivRawRecord(Record):
             )
             self.versions.append(entry)
             if version.is_current:
-                super().__init__(version)
+                super().__init__(version, False)
         self.versions.sort(key=lambda x: x.version)
         
     def  __repr__(self) -> str:
@@ -137,7 +146,7 @@ class dcRecord(Record):
     def __init__(self, metadata: List[Metadata]):
         for version in metadata:
             if version.is_current:
-                super().__init__(version)
+                super().__init__(version, True)
                 self.current_version_date=version.created
                 self.authors= parse_author_affil(version.authors)
             
@@ -169,7 +178,7 @@ class dcRecord(Record):
 class arXivOldRecord(Record):
     #no extra data
     def __init__(self, current_meta: Metadata):
-        super().__init__(current_meta)
+        super().__init__(current_meta, False)
     def  __repr__(self) -> str:
         return (f"arXivOldRecord({self.current_meta.paper_id}, {self.header.date.date()})")
     
