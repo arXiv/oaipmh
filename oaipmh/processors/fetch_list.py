@@ -83,7 +83,7 @@ def fetch_list(just_ids:bool, start_date :datetime, end_date:datetime, meta_type
     
 
     headers={'Surrogate-Control': f'max-age=345600'} #gets cleared by announce
-    headers=add_surrogate_key(headers,["announce"])        
+    headers=add_surrogate_key(headers,["announce", "oai-list"])        
               
     return response, 200, headers
 

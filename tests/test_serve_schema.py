@@ -5,7 +5,7 @@ def test_schema_arXivRaw(test_client):
     assert response.status_code == 200
     assert "application/xml" in response.headers["Content-Type"] 
     assert response.headers["Surrogate-Control"] == "max-age=31536000"
-    assert response.headers["Surrogate-Key"] == "oai"
+    assert response.headers["Surrogate-Key"] == "oai oai-static"
     assert b"<schema" in response.data  
     assert b"</schema>" in response.data 
     assert b'xmlns:arXivRaw="http://arxiv.org/OAI/arXivRaw/"' in response.data 
@@ -17,7 +17,7 @@ def test_schema_arXivOld(test_client):
     assert response.status_code == 200
     assert "application/xml" in response.headers["Content-Type"] 
     assert response.headers["Surrogate-Control"] == "max-age=31536000"
-    assert response.headers["Surrogate-Key"] == "oai"
+    assert response.headers["Surrogate-Key"] == "oai oai-static"
     assert b"<schema" in response.data  
     assert b"</schema>" in response.data 
     assert b'xmlns:arXivOld="http://arxiv.org/OAI/arXivOld/"' in response.data 
@@ -29,7 +29,7 @@ def test_schema_arXiv(test_client):
     assert response.status_code == 200
     assert "application/xml" in response.headers["Content-Type"] 
     assert response.headers["Surrogate-Control"] == "max-age=31536000"
-    assert response.headers["Surrogate-Key"] == "oai"
+    assert response.headers["Surrogate-Key"] == "oai oai-static"
     assert b"<schema" in response.data  
     assert b"</schema>" in response.data 
     assert b'xmlns:arXiv="http://arxiv.org/OAI/arXiv/"' in response.data 
