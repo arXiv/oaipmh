@@ -37,6 +37,6 @@ def do_get_record(arxiv_id: Identifier, format: MetadataFormat, query_data: Dict
         format=format.prefix
         )
     headers={'Surrogate-Control': 'max-age=800000'} 
-    headers=add_surrogate_key(headers,[f"paper-id-{arxiv_id.id}"]) 
+    headers=add_surrogate_key(headers,[f"paper-id-{arxiv_id.id}", f"paper-id-{arxiv_id.id}-current", "oai-get-record"]) 
     return response, 200, headers
 

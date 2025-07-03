@@ -3,6 +3,8 @@ from datetime import timezone, datetime
 
 from flask import render_template
 
+from arxiv.integration.fastly.headers import add_surrogate_key
+
 from oaipmh.data import oai_config
 from oaipmh.data.oai_errors import OAIBadArgument, OAINonexistentID
 from oaipmh.data.oai_properties import OAIParams, OAIVerbs
@@ -23,7 +25,7 @@ def identify(params: Dict[str, str]) -> Response:
         config_data=oai_config
         )
     headers={'Surrogate-Control': f'max-age=31536000'} #a year, shouldn't change
-    
+    headers=add_surrogate_key(headers,["oai-static"])
     return response, 200, headers
 
 def list_metadata_formats(params: Dict[str, str]) -> Response:
@@ -55,7 +57,7 @@ def list_metadata_formats(params: Dict[str, str]) -> Response:
         formats=oai_config.SUPPORTED_METADATA_FORMATS
         )
     headers={'Surrogate-Control': f'max-age=31536000'} #a year, shouldn't change
-    
+    headers=add_surrogate_key(headers,["oai-static"])
     return response, 200, headers
 
 def list_sets(params: Dict[str, str]) -> Response:

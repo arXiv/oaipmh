@@ -23,7 +23,7 @@ def test_good_params(test_client):
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "text/xml"
     assert response.headers["Surrogate-Control"] == "max-age=31536000"
-    assert response.headers["Surrogate-Key"] == "oai" 
+    assert response.headers["Surrogate-Key"] == "oai-static oai" 
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" not in text
 
@@ -31,7 +31,7 @@ def test_good_params(test_client):
     assert response.status_code == 200 
     assert response.headers["Content-Type"] == "text/xml"
     assert response.headers["Surrogate-Control"] == "max-age=31536000"
-    assert response.headers["Surrogate-Key"] == "oai"
+    assert response.headers["Surrogate-Key"] == "oai-static oai"
     text=response.get_data(as_text=True)
     assert "<error code='badArgument'>" not in text
 
