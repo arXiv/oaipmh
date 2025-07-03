@@ -49,7 +49,7 @@ def oai() -> Response:
 
 def __send_schema(file_path:str)-> Response:
     response= send_file(file_path, mimetype="application/xml")
-    response.headers=add_surrogate_key(response.headers,["oai"])
+    response.headers=add_surrogate_key(response.headers,["oai", "oai-static"])
     response.headers['Surrogate-Control']='max-age=31536000'
     return response
 

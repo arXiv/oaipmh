@@ -3,8 +3,9 @@ from typing import Dict, Any, Union, List
 
 from flask import render_template
 
+from arxiv.integration.fastly.headers import add_surrogate_key
 from arxiv.taxonomy.category import Group, Archive, Category
-from arxiv.taxonomy.definitions import ARCHIVES, GROUPS, CATEGORIES_ACTIVE, CATEGORIES
+from arxiv.taxonomy.definitions import ARCHIVES, GROUPS, CATEGORIES_ACTIVE
 
 from oaipmh.data.oai_properties import OAIParams
 from oaipmh.serializers.output_formats import Response
@@ -27,6 +28,7 @@ def display_set_structure(query_data: Dict[OAIParams, Any]) -> Response:
                 to_set= make_set_str
     )
     headers={'Surrogate-Control': f'max-age=31536000'} #a year, shouldn't change
+    headers=add_surrogate_key(headers,["oai-static"])
     return response, 200, headers
 
 def make_set_str(item: Union[Group, Archive, Category]) -> str:
