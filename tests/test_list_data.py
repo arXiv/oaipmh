@@ -20,7 +20,7 @@ def test_good_params(test_client):
     response = test_client.get("/oai", query_string=params)
     assert response.status_code == 200 
     assert response.headers["Content-Type"] == "text/xml"
-    assert response.headers["Surrogate-Control"]==('max-age=345600')
+    assert response.headers["Surrogate-Control"]==('max-age=3600')
     assert response.headers["Surrogate-Key"] == "announce oai-list oai" 
     text=response.get_data(as_text=True)
     assert "<error code=" not in text
@@ -28,7 +28,7 @@ def test_good_params(test_client):
     response = test_client.post("/oai", data=params)
     assert response.status_code == 200 
     assert response.headers["Content-Type"] == "text/xml"
-    assert response.headers["Surrogate-Control"]==('max-age=345600')
+    assert response.headers["Surrogate-Control"]==('max-age=3600')
     assert response.headers["Surrogate-Key"] == "announce oai-list oai"
     text=response.get_data(as_text=True)
     assert "<error code=" not in text
