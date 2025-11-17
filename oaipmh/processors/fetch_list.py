@@ -65,24 +65,27 @@ def fetch_list(just_ids:bool, start_date :datetime, end_date:datetime, meta_type
         #remove the extra object above limit
         objects = [item for item in objects if (item.id if just_ids else item.header.id) != last_paper]
 
+    now=datetime.now(timezone.utc)
     if just_ids:
         response=render_template("list_identifiers.xml", 
-            response_date=datetime.now(timezone.utc),
+            response_date=now,
             query_params=query_data,
             headers=objects,
             token=res_token
             )
     else:
         response=render_template("list_records.xml", 
-            response_date=datetime.now(timezone.utc),
+            response_date=now,
             query_params=query_data,
             records=objects,
             format=meta_type.prefix,
             token=res_token
             )
     
-
-    headers={'Surrogate-Control': f'max-age=345600'} #gets cleared by announce
+    if end_date>= now:
+        headers={'Surrogate-Control': f'max-age=3600'} #this data is still changing
+    else:
+        headers={'Surrogate-Control': f'max-age=345600'} #gets cleared by announce
     headers=add_surrogate_key(headers,["announce", "oai-list"])        
               
     return response, 200, headers
