@@ -41,7 +41,20 @@ def test_token_encoding_decoding():
     assert num ==33
 
 def test_invalid_token_structure():
+    #wrong skip key
     params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.META_PREFIX:'oai_dc', 'skip_val':55}
+    encoded_invalid_token =quote(urlencode(params))
+    with pytest.raises(OAIBadResumptionToken, match="Token decoding failed or format is invalid."):
+        ResToken.from_token(encoded_invalid_token)
+
+    #bad skip value
+    params = {OAIParams.VERB: OAIVerbs.LIST_RECORDS, OAIParams.META_PREFIX:'oai_dc', 'skip':'thirty'}
+    encoded_invalid_token =quote(urlencode(params))
+    with pytest.raises(OAIBadResumptionToken, match="Token decoding failed or format is invalid."):
+        ResToken.from_token(encoded_invalid_token)
+
+    #missing verb
+    params = { OAIParams.META_PREFIX:'oai_dc', 'skip':55}
     encoded_invalid_token =quote(urlencode(params))
     with pytest.raises(OAIBadResumptionToken, match="Token decoding failed or format is invalid."):
         ResToken.from_token(encoded_invalid_token)
