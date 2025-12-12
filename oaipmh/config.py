@@ -19,6 +19,9 @@ class Settings(arxiv_base.Settings):
     FLASKS3_FORCE_MIMETYPE: bool = True
     FLASKS3_ACTIVE: bool = False
 
+    RECORDS_LIMIT: int=2500
+    IDENTIFIERS_LIMIT: int=20000 
+
     def check(self) -> None:
         """A check and fix up of a settings object."""
         if 'sqlite' in self.CLASSIC_DB_URI:
