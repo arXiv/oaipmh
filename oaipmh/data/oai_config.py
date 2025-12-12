@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from oaipmh.data.oai_properties import MetadataFormat
 
-RECORDS_LIMIT=3500
+RECORDS_LIMIT=3000
 IDENTIFIERS_LIMIT=20000 
 
 SUPPORTED_METADATA_FORMATS={
