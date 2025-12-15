@@ -4,10 +4,9 @@ from datetime import datetime, timezone
 from flask import Flask, render_template
 from flask_s3 import FlaskS3
 from flask.logging import default_handler
-from werkzeug.exceptions import HTTPException
 
 from arxiv.base import Base
-from arxiv.db import config_query_timing, configure_db
+from arxiv.db import configure_db
 from arxiv.integration.fastly.headers import add_surrogate_key
 
 from oaipmh.data.oai_errors import OAIException

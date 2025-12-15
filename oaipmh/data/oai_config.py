@@ -1,8 +1,10 @@
 from datetime import datetime, timezone
 from oaipmh.data.oai_properties import MetadataFormat
+from oaipmh.config import Settings
 
-RECORDS_LIMIT=2500
-IDENTIFIERS_LIMIT=20000 
+settings = Settings()  
+RECORDS_LIMIT = settings.RECORDS_LIMIT
+IDENTIFIERS_LIMIT=settings.IDENTIFIERS_LIMIT
 
 SUPPORTED_METADATA_FORMATS={
     "oai_dc":MetadataFormat(
