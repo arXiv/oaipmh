@@ -27,7 +27,8 @@ def test_oai_dc_format(test_client):
     assert '<dc:description>15 pages. This version corrects some misprints of the published version</dc:description>' in text
     assert '<dc:date>2008-06-25</dc:date>' in text #initial publish day
     assert '<dc:date>2014-12-12</dc:date>' in text #publish date of latest version
-    assert '<dc:type>text</dc:type>' in text #we are alwasy text
+    assert '<dc:type>text</dc:type>' in text #we are always text
+    assert '<dc:identifier>https://arxiv.org/abs/0806.4129</dc:identifier>' in text
     assert '<dc:identifier>http://arxiv.org/abs/0806.4129</dc:identifier>' in text
     assert '<dc:identifier>AIP Conf.Proc.1316:466-477,2010</dc:identifier>' in text
     assert '<dc:identifier>doi:10.1063/1.3536454</dc:identifier>' in text
