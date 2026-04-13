@@ -42,6 +42,7 @@
             <dc:date>{{record.current_version_date.strftime('%Y-%m-%d')}}</dc:date>
         {% endif %}
         <dc:type>text</dc:type>
+        <dc:identifier>https://arxiv.org/abs/{{record.current_meta.paper_id}}</dc:identifier>
         <dc:identifier>http://arxiv.org/abs/{{record.current_meta.paper_id}}</dc:identifier>
         {% if record.current_meta.journal_ref %}
             <dc:identifier>{{record.current_meta.journal_ref}}</dc:identifier>
