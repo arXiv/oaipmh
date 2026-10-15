@@ -108,4 +108,19 @@ def test_arXivRaw_format(test_client):
     assert '<source_type>D</source_type>' in text
 
 
+def test_arXiv_acm_class(test_client):
+    params = {OAIParams.VERB: OAIVerbs.GET_RECORD, OAIParams.ID: "oai:arXiv.org:1102.0401",  OAIParams.META_PREFIX: "arXiv"}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200
+    text=response.get_data(as_text=True)
+    assert '<msc-class>05C69, 05C70 (Primary) 05A20(Secondary)</msc-class>' in text
+    assert '<acm-class>G.2.2</acm-class>' in text
 
+
+def test_arXivRaw_acm_class(test_client):
+    params = {OAIParams.VERB: OAIVerbs.GET_RECORD, OAIParams.ID: "oai:arXiv.org:1102.0401",  OAIParams.META_PREFIX: "arXivRaw"}
+    response = test_client.get("/oai", query_string=params)
+    assert response.status_code == 200
+    text=response.get_data(as_text=True)
+    assert '<msc-class>05C69, 05C70 (Primary) 05A20(Secondary)</msc-class>' in text
+    assert '<acm-class>G.2.2</acm-class>' in text
