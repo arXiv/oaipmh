@@ -8,7 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 
-arxiv-base = {git = "https://github.com/arXiv/arxiv-base.git", rev = "8135d213c8409297e807f1d9a73709799b9750ef"}
+arxiv-base = {git = "https://github.com/arXiv/arxiv-base.git", rev = "8841f53ba87e1cc4694a7d9e35d6fa5dd0bb240b"}
 
 flask = "*"
 
