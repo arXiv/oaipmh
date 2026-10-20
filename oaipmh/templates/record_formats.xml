@@ -90,7 +90,7 @@
             <msc-class>{{ record.current_meta.msc_class }}</msc-class>
         {% endif %}
         {% if record.current_meta.acm_class %}
-            <acm-class>{{ record.current_meta.msc_class }}</acm-class>
+            <acm-class>{{ record.current_meta.acm_class }}</acm-class>
         {% endif %}
         {% if record.current_meta.journal_ref %}
             <journal-ref>{{ record.current_meta.journal_ref }}</journal-ref>
@@ -133,7 +133,7 @@
             <report-no>{{ record.current_meta.report_num }}</report-no>
         {% endif %}
         {% if record.current_meta.acm_class %}
-            <acm-class>{{ record.current_meta.msc_class }}</acm-class>
+            <acm-class>{{ record.current_meta.acm_class }}</acm-class>
         {% endif %}
         {% if record.current_meta.msc_class %}
             <msc-class>{{ record.current_meta.msc_class }}</msc-class>
