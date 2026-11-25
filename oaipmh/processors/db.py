@@ -1,7 +1,7 @@
 from typing import Optional, List, Union, Tuple, Set
 from datetime import datetime
 
-from sqlalchemy import  or_, and_
+from sqlalchemy import  or_, and_, exists
 from sqlalchemy.orm import aliased, load_only
 
 from arxiv.db import Session
@@ -39,20 +39,25 @@ def get_list_data(just_ids:bool, start_date :datetime, end_date:datetime, all_ve
         aic = aliased(t_arXiv_in_category)
         cat_conditions = [and_(aic.c.archive == arch_part, aic.c.subject_class == subj_part) for arch_part, subj_part in cats]
 
+        # EXISTS, not JOIN + DISTINCT: the join yields one row per matching
+        # category, so DISTINCT had to deduplicate every match in the date range
+        # (~1M rows for cs) in a temporary table before sorting; EXISTS checks the
+        # categories only until the page is full. A document has one current row,
+        # so no DISTINCT is needed (20 s -> 8 s for a cs page from 2010 on rep14).
+        in_set = exists().where(
+            aic.c.document_id == Metadata.document_id,
+            or_(
+                aic.c.archive.in_(archives),
+                or_(*cat_conditions),
+            ),
+        )
         selected_doc_ids=(Session.query(Metadata.document_id)
-            .join(aic, Metadata.document_id == aic.c.document_id)
             .filter(
-                Metadata.modtime >= start_timestamp,  
-                Metadata.modtime <= end_timestamp,  
-                Metadata.is_current == 1,  
+                Metadata.modtime >= start_timestamp,
+                Metadata.modtime <= end_timestamp,
+                Metadata.is_current == 1,
+                in_set,
             )
-            .filter(
-                or_(
-                    aic.c.archive.in_(archives),
-                    or_(*cat_conditions),
-                )
-            )
-            .distinct()
             .order_by(Metadata.modtime, Metadata.paper_id)
             .offset(skip)
             .limit(limit+1) #one extra to see if resumption token needed

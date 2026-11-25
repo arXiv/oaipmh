@@ -70,6 +70,24 @@ def test_data_fetch_selective_set():
     assert not any(obj.header.id == "oai:arXiv.org:hep-th/9901002" for obj in objects)
     assert  any(obj.header.id == "oai:arXiv.org:0712.3217" for obj in objects)
 
+def test_data_fetch_set_lists_each_paper_once():
+    # 4 of the 9 math papers have two math categories (e.g. 0906.2112 math.AG math.NT):
+    # each must come back once and take one place in the page limit.
+    def fetch(limit):
+        return get_list_data(
+            just_ids=True,
+            start_date=datetime(1970,1,1,0,0,0),
+            end_date=datetime(2030,1,1,0,0,0),
+            all_versions=False,
+            rq_set=GROUPS['grp_math'],
+            skip=0,
+            limit=limit
+            )
+    ids = [item.paper_id for item in fetch(100)]
+    assert len(ids) == 9 and len(set(ids)) == 9
+    assert {"0906.2112", "0906.3421", "0906.4150", "0712.3217"} <= set(ids)
+    assert len({item.paper_id for item in fetch(4)}) == 5 #limit+1 distinct papers
+
 def test_data_fetch_selective_set_alias():
     data=get_list_data(
         just_ids=False,
